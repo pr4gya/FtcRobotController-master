@@ -4,7 +4,10 @@ package HelperClass;
 import android.os.SystemClock;
 import android.util.Log;
 import java.util.concurrent.TimeUnit;
-
+import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
+import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
+import com.qualcomm.hardware.rev.Rev2mDistanceSensor;
+import com.qualcomm.robotcore.hardware.DistanceSensor;
 import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.DcMotorEx;
 import com.qualcomm.robotcore.hardware.I2cAddr;
@@ -24,6 +27,7 @@ import org.firstinspires.ftc.robotcore.external.navigation.AxesOrder;
 import org.firstinspires.ftc.robotcore.external.navigation.AxesReference;
 import org.firstinspires.ftc.robotcore.external.navigation.Orientation;
 
+import org.firstinspires.ftc.teamcode.Vortex14969RedAutonomous;
 
 
 public class Robot {
@@ -43,24 +47,52 @@ public class Robot {
     public Servo claw = null;
 
     public float moveTarget = 0;
-    //b4 90
+
     public float countPerInch = 90;
     public float inchesPer360 = 79.0116f;
-    public float movePower = 0;
+    public float movePower = 1;
     public int moveStep = 0;
 
+    public float maxSpeed = 0.5f;
+    public float medSpeed = 0.25f;
 
 
-    public enum movementDirection {
-        noMovement, moveForward, moveBackward, strafeLeft, strafeRight, turnLeft, turnRight, pivotRotation }
+    public float strafeSpeed = 0.25f;
+    public float sidedistR = 0.0f;
+    public float fwdDistR = 0.0f;
+    public float speedR = 0.0f;
+    public float strafeStartDist = 0.0f;
 
+    public float straightLDR = 0.0f;
+    public float straightspeedR = 0.0f;
+    public float sideLDR = 0.0f;
+    public float sidespeedLR = 0.0f;
+
+
+    public final static double CLAW_HOME = 0.0;
+    public final static double CLAW_MIN = 0.0;
+    public final static double CLAW_MAX = 1.0;
+
+    public ElapsedTime runtime1 = new ElapsedTime();
+    public double currentTime1 = runtime1.seconds();
 
     public static BNO055IMU imu;
     public Orientation angles;
     public Acceleration gravity;
     public static double startingAngle=0;
+    private float angleLast;
+    public DistanceSensor frontRange;
+    public DistanceSensor redWallRange;
 
 
+    public enum AutoStep {
+        strafeStart, strafeStop, fwdMv, fwdMvStop, wbleMv, wbleMvStop, shootCont, end,
+        dropwbl, wbleStart, wbleStop, launchlinestart , launchlinestop, launchlineend, launchlinestop2,
+        alignToShootRangeStart, alignToShootRangeStop, readyToShoot, shootStart, shootEnd, takePowerShoot
+
+    }
+
+    public AutoStep autostep = AutoStep.end;
 
     /* local OpMode members. */
     HardwareMap hwMap = null;
@@ -75,7 +107,6 @@ public class Robot {
         inchesPer360 = (float) (rad * 2 * Math.PI);
     }
 
-
     public void init(HardwareMap ahwMap) throws InterruptedException {
 
         hwMap = ahwMap;
@@ -89,18 +120,30 @@ public class Robot {
         shooting1 = hwMap.get(DcMotorEx.class, "shooting1");
         shooting2 = hwMap.get(DcMotorEx.class, "shooting2");
         arm = hwMap.get(DcMotorEx.class,"arm" );
+
         intakeHolder = hwMap.get(Servo.class, "intakeHolder");
         ringPush = hwMap.get(Servo.class, "ringPush");
         claw = hwMap.get(Servo.class, "claw");
+
+
+        // Initailizing Rev 2M Distance sensor
+        // I2C Port - 2 Front Range Sensor connected
+        frontRange = hwMap.get(DistanceSensor.class, "range_front");
+        // I2C Port - 1 Red Wall Range Sensor connected
+        redWallRange = hwMap.get(DistanceSensor.class, "range_red_wall");
+
+
         //FLMotor = hwMap.get(DcMotor.class, "FLMotor");
         //BLMotor = hwMap.get(DcMotor.class, "BLMotor");
         //FRMotor = hwMap.get(DcMotor.class, "FRMotor");
         //BRMotor = hwMap.get(DcMotor.class, "BRMotor");
+
         FLMotor.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
         BLMotor.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
         FRMotor.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
         BRMotor.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
         arm.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
+
         //FLMotor.setDirection(DcMotor.Direction.FORWARD);
         //BLMotor.setDirection(DcMotor.Direction.FORWARD);
         //FRMotor.setDirection(DcMotor.Direction.REVERSE);
@@ -110,18 +153,20 @@ public class Robot {
         FRMotor.setDirection(DcMotor.Direction.FORWARD);
         BRMotor.setDirection(DcMotor.Direction.FORWARD);
         intake.setDirection(DcMotor.Direction.FORWARD);
-        shooting1.setDirection(DcMotor.Direction.REVERSE);
-        shooting2.setDirection(DcMotor.Direction.FORWARD);
-        arm.setDirection(DcMotor.Direction.FORWARD);
+        shooting1.setDirection(DcMotor.Direction.FORWARD);
+        shooting2.setDirection(DcMotor.Direction.REVERSE);
+        arm.setDirection(DcMotor.Direction.REVERSE);
         //servos
         ringPush.setDirection(Servo.Direction.FORWARD);
         intakeHolder.setDirection(Servo.Direction.FORWARD);
         claw.setDirection(Servo.Direction.FORWARD);
+        claw.setPosition(CLAW_HOME);
 
         FLMotor.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
         BLMotor.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
         FRMotor.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
         BRMotor.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+
         arm.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
         FLMotor.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
         BLMotor.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
@@ -138,6 +183,9 @@ public class Robot {
         shooting2.setZeroPowerBehavior(DcMotorEx.ZeroPowerBehavior.BRAKE);
         arm.setZeroPowerBehavior(DcMotorEx.ZeroPowerBehavior.BRAKE);
 
+
+
+        // I2C Port - 0 IMU Connected
         BNO055IMU.Parameters parameters = new BNO055IMU.Parameters();
         parameters.angleUnit            = BNO055IMU.AngleUnit.DEGREES;
         parameters.accelUnit            = BNO055IMU.AccelUnit.METERS_PERSEC_PERSEC;
@@ -220,42 +268,27 @@ public class Robot {
         return (angles.firstAngle);
     }
 
-    /*
-    // Direction coule front , back , left strafing , right strafing
-    public void moveRobot (float d,float v, float angle1) {
 
-            initRobotAngle=angle1;
-            if ((getRobotAngle() > 315) || (getRobotAngle() < 45)) moveTarget = d-fieldY;
-            else if ((getRobotAngle() > 135) && (getRobotAngle() < 225)) moveTarget = fieldY -d;
-            else if ((getRobotAngle() > 45) && (getRobotAngle() < 135)) moveTarget = d - fieldX;
-            else moveTarget = fieldX - d;
-            movePower.setAll(v);
-            moveStep=MoveStep.moveHoldAngle;
-
-    }
-
-     */
-    //
 
     public void moveRobot () {
-
+//        FLMotor.setPower(0.25);
+//        BLMotor.setPower(0.25);
+//        FRMotor.setPower(0.25);
+//        BRMotor.setPower(0.25);
         moveStep = 1;
-
     }
 
 
-   /* public void stopRobot ()  {
-        FLMotor.setPower(0);
-        BLMotor.setPower(0);
-        FRMotor.setPower(0);
-        BRMotor.setPower(0);
-    }
-*/
 
     public void strafe()  {
         moveStep = 6;
     }
-
+    public void strafe2(){
+        moveStep = 40;
+    }
+    public void mvFwd(){
+        moveStep = 41;
+    }
     public void shoot(){
         moveStep = 31;
     }
@@ -263,50 +296,43 @@ public class Robot {
         moveStep = 30;
     }
 
+    public void mvDestination(float fwdDist, float speed, float sideDist){
+        strafeStartDist = 6.0f;
+        fwdDistR = fwdDist;
+        strafeSpeed = -0.25f;
+        speedR = speed;
+        sidedistR = sideDist;
+        autostep = AutoStep.strafeStart;
+
+    }
+
+    public void mvlaunchLine(float straightLD, float straightspeed, float sideLD, float sidespeedL) {
+        straightLDR = straightLD;
+        straightspeedR = straightspeed;
+        sideLDR = sideLD;
+        sidespeedLR = sidespeedL;
+      //  autostep = AutoStep.launchlinestart;
+    }
 
 
+    public void adjustAngle () {
 
-    public void moveUpdate() {
+    }
+    public void moveUpdate() throws InterruptedException {
 
-        switch (moveStep) {
-            case 0:
-                break; //End everything
 
-            //MOVE THE ROBOT
-            case 1:
-                FLMotor.setPower(movePower);
-                BLMotor.setPower(movePower);
-                FRMotor.setPower(movePower);
-                BRMotor.setPower(movePower);
-                moveStep = 11; //this and the break statement can be removed to no effect
+        switch (autostep){
+
+            case strafeStart:
+                FLMotor.setPower(strafeSpeed);
+                BLMotor.setPower(-strafeSpeed);
+                FRMotor.setPower(-strafeSpeed);
+                BRMotor.setPower(strafeSpeed);
+                autostep = AutoStep.strafeStop;
                 break;
-            case 11:
 
-                if (Math.abs(moveTarget*countPerInch * .1) - Math.abs(FLMotor.getCurrentPosition()) <= 0) {
-                    FLMotor.setPower(movePower);
-                    BLMotor.setPower(movePower);
-                    FRMotor.setPower(movePower);
-                    BRMotor.setPower(movePower);
-                    moveStep = 12; //this and the break statement can be removed to no effect
-
-                }
-                break;
-            case 12:
-
-                if (Math.abs(moveTarget*countPerInch) - Math.abs(FLMotor.getCurrentPosition()) <= 0) {
-                    FLMotor.setPower(movePower);
-                    BLMotor.setPower(movePower);
-                    FRMotor.setPower(movePower);
-                    BRMotor.setPower(movePower);
-                    moveStep = 2; //this and the break statement can be removed to no effect
-
-                }
-                break;
-            case 2:
-
-            case 9:
-
-                if (Math.abs(moveTarget*countPerInch) - Math.abs(FLMotor.getCurrentPosition()) <= 0) {
+            case strafeStop:
+                if (Math.abs(strafeStartDist*countPerInch) - Math.abs(FLMotor.getCurrentPosition()) <= 0) {
                     FLMotor.setPower(0);
                     BLMotor.setPower(0);
                     FRMotor.setPower(0);
@@ -320,44 +346,26 @@ public class Robot {
                     BLMotor.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
                     FRMotor.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
                     BRMotor.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
-                    moveStep = 3;
-                }
-                break;
-            //END OF MOVING THE ROBOT
-
-            case 3:
-                moveStep = 0;
-                break;
-
-            //STRAFE
-            case 6:
-                FLMotor.setPower(movePower);
-                BLMotor.setPower(-movePower);
-                FRMotor.setPower(-movePower);
-                BRMotor.setPower(movePower);
-                moveStep = 9;
-                break;
-
-            //TURNS THE ROBOT
-            case 10:
-                if(moveTarget-getRobotAngle() < 0){
-                    FLMotor.setPower(movePower);
-                    BLMotor.setPower(movePower);
-                    FRMotor.setPower(-movePower);
-                    BRMotor.setPower(-movePower);
-                    moveStep = 20;
+                    strafeStartDist = 0;
+                    autostep = AutoStep.fwdMv;
                 }
                 else{
-                    FLMotor.setPower(-movePower);
-                    BLMotor.setPower(-movePower);
-                    FRMotor.setPower(movePower);
-                    BRMotor.setPower(movePower);
-                    moveStep = 21;
+                    autostep = AutoStep.strafeStart;
                 }
+
                 break;
 
-            case 20:
-                if (moveTarget - getRobotAngle()  >= -2) {
+
+            case fwdMv:
+                FLMotor.setPower(speedR);
+                BLMotor.setPower(speedR);
+                FRMotor.setPower(speedR);
+                BRMotor.setPower(speedR);
+                autostep = AutoStep.fwdMvStop;
+                break;
+
+            case fwdMvStop:
+                if (Math.abs(fwdDistR*countPerInch) - Math.abs(FLMotor.getCurrentPosition()) <= 0) {
                     FLMotor.setPower(0);
                     BLMotor.setPower(0);
                     FRMotor.setPower(0);
@@ -371,12 +379,26 @@ public class Robot {
                     BLMotor.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
                     FRMotor.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
                     BRMotor.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
-                    moveStep = 3;
+                    autostep = AutoStep.wbleMv;
+                }
+                else{
+                    autostep = AutoStep.fwdMv;
                 }
                 break;
 
-            case 21:
-                if (moveTarget - getRobotAngle() <= 2) {
+
+            case wbleMv:
+                strafeSpeed = 0.25f;
+                FLMotor.setPower(strafeSpeed);
+                BLMotor.setPower(-strafeSpeed);
+                FRMotor.setPower(-strafeSpeed);
+                BRMotor.setPower(strafeSpeed);
+                autostep = AutoStep.wbleMvStop;
+                break;
+
+
+            case wbleMvStop:
+                if (Math.abs(sidedistR*countPerInch) - Math.abs(FLMotor.getCurrentPosition()) <= 0) {
                     FLMotor.setPower(0);
                     BLMotor.setPower(0);
                     FRMotor.setPower(0);
@@ -390,27 +412,225 @@ public class Robot {
                     BLMotor.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
                     FRMotor.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
                     BRMotor.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
-                    moveStep = 3;
+                    autostep = AutoStep.wbleStart;
+                    break;
+
+                }
+                else{
+                    autostep = AutoStep.wbleMv;
+                    break;
+                }
+
+            case wbleStart:
+                runtime1.reset();
+                currentTime1 = runtime1.seconds();
+                arm.setPower(-0.15);
+                SystemClock.sleep(1000);
+                arm.setPower(0);
+                autostep=AutoStep.dropwbl;
+                break;
+
+            case dropwbl:
+                SystemClock.sleep(1000);
+                claw.setPosition(1);
+                SystemClock.sleep(1000);
+                //if (claw.getPosition()==1) {
+                autostep = AutoStep.wbleStop;
+                //}
+
+                break;
+
+            case wbleStop:
+                arm.setPower(0.2);
+                SystemClock.sleep(500);
+                arm.setPower(0);
+                claw.setPosition(0.5);
+                autostep = AutoStep.launchlinestart;
+            break;
+
+            case end:
+                break;
+
+            case launchlinestart:
+                FLMotor.setPower(sidespeedLR);
+                BLMotor.setPower(-sidespeedLR);
+                FRMotor.setPower(-sidespeedLR);
+                BRMotor.setPower(sidespeedLR);
+                autostep = AutoStep.launchlinestop;
+                break;
+
+            case launchlinestop:
+                if (Math.abs(sideLDR*countPerInch) - Math.abs(FLMotor.getCurrentPosition()) <= 0) {
+                    FLMotor.setPower(0);
+                    BLMotor.setPower(0);
+                    FRMotor.setPower(0);
+                    BRMotor.setPower(0);
+                    FLMotor.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+                    BLMotor.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+                    FRMotor.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+                    BRMotor.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+
+                    FLMotor.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
+                    BLMotor.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
+                    FRMotor.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
+                    BRMotor.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
+                    strafeStartDist = 0;
+                    autostep = AutoStep.end;
+                    if(straightLDR>0){
+                        autostep= AutoStep.launchlineend;
+                    }
+                }
+                else{
+                    autostep = AutoStep.launchlinestart;
                 }
                 break;
-            case 30:
-                intake.setPower(movePower);
+
+            case launchlineend:
+                FLMotor.setPower(straightspeedR);
+                BLMotor.setPower(straightspeedR);
+                FRMotor.setPower(straightspeedR);
+                BRMotor.setPower(straightspeedR);
+                autostep = AutoStep.launchlinestop2;
                 break;
-            case 31:
-                shooting1.setPower(movePower);
-                shooting2.setPower(movePower);
+
+            case launchlinestop2:
+                if (Math.abs(straightLDR*countPerInch) - Math.abs(FLMotor.getCurrentPosition()) <= 0) {
+                    FLMotor.setPower(0);
+                    BLMotor.setPower(0);
+                    FRMotor.setPower(0);
+                    BRMotor.setPower(0);
+                    FLMotor.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+                    BLMotor.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+                    FRMotor.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+                    BRMotor.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+
+                    FLMotor.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
+                    BLMotor.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
+                    FRMotor.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
+                    BRMotor.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
+                    autostep = AutoStep.alignToShootRangeStart;
+                }
+                else{
+                    autostep = AutoStep.launchlineend;
+                }
                 break;
 
 
-            default:
-                moveStep = 0;
+            case alignToShootRangeStart:
+
+                angleLast = getRobotAngle();
+
+                if (360 - angleLast < 90) {
+                    FLMotor.setPower(0.2);
+                    BLMotor.setPower(0.2);
+                    FRMotor.setPower(-0.2);
+                    BRMotor.setPower(-0.2);
+                    autostep = AutoStep.alignToShootRangeStop;
+
+                } else if (angleLast - 0 < 90) {
+                    FLMotor.setPower(-0.2);
+                    BLMotor.setPower(-0.2);
+                    FRMotor.setPower(0.2);
+                    BRMotor.setPower(0.2);
+                    autostep = AutoStep.alignToShootRangeStop;
+                }
+
+
                 break;
+
+
+            case alignToShootRangeStop:
+
+                angleLast = getRobotAngle();
+
+                if (360 - angleLast  <= 1) {
+                    FLMotor.setPower(0);
+                    BLMotor.setPower(0);
+                    FRMotor.setPower(0);
+                    BRMotor.setPower(0);
+                    FLMotor.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+                    BLMotor.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+                    FRMotor.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+                    BRMotor.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+
+                    FLMotor.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
+                    BLMotor.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
+                    FRMotor.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
+                    BRMotor.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
+                    autostep = AutoStep.readyToShoot;
+
+                } else if (angleLast - 0 <= 1) {
+                    FLMotor.setPower(0);
+                    BLMotor.setPower(0);
+                    FRMotor.setPower(0);
+                    BRMotor.setPower(0);
+                    FLMotor.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+                    BLMotor.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+                    FRMotor.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+                    BRMotor.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+
+                    FLMotor.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
+                    BLMotor.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
+                    FRMotor.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
+                    BRMotor.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
+                    autostep = AutoStep.readyToShoot;
+
+                } else {
+                    autostep = AutoStep.alignToShootRangeStop;
+                }
+
+                break;
+
+            case readyToShoot:
+
+                SystemClock.sleep(1000);
+                autostep = AutoStep.shootStart;
+
+                break;
+
+            case shootStart:
+                //ringPush.setPosition(0);
+                shooting1.setPower(-0.8);
+                shooting2.setPower(-0.8);
+                SystemClock.sleep(500);
+                ringPush.setPosition(1);
+                SystemClock.sleep(1000);
+                ringPush.setPosition(0);
+                SystemClock.sleep(1000);
+                ringPush.setPosition(1);
+                SystemClock.sleep(1000);
+                ringPush.setPosition(0);
+                intake.setPower(-2);
+                SystemClock.sleep(1000);
+                ringPush.setPosition(1);
+                autostep=AutoStep.shootEnd;
+                break;
+
+            case takePowerShoot:
+
+
+
+                break;
+
+            case shootEnd:
+                SystemClock.sleep(2000);
+                shooting1.setPower(0);
+                shooting2.setPower(0);
+                autostep=AutoStep.end;
+                break;
+
+
         }
+
 
     }
 
 
 }
+
+
+
+
 
 
 
