@@ -1,6 +1,5 @@
 package org.firstinspires.ftc.teamcode;
 
-
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
@@ -42,9 +41,11 @@ public class RedAuto extends LinearOpMode {
     double position = 0.5;
     float ringsShot = 0;
 
+
     Robot robot = new Robot();
     private ElapsedTime runtime = new ElapsedTime();
     private double currentTime = runtime.seconds();
+
 
 
     @Override
@@ -68,52 +69,40 @@ public class RedAuto extends LinearOpMode {
             rVision.updateRingCount();
             ringCountOnField = rVision.getRingCount();
             ringCountOnFieldLast = ringCountOnField;
-            currentTime = 0;
-            int correct = robot.arm.getCurrentPosition();
-            robot.arm.setPower(0);
-            robot.arm.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
-            robot.claw.setPosition(-1);
-            robot.ringPush.setPosition(0);
+
+            // This code should move to a method in Robot Class
+            // 24Nov
+//            int correct = robot.arm.getCurrentPosition();
+//            robot.arm.setPower(0);
+//            robot.arm.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
+//            robot.claw.setPosition(-1);
+//            robot.ringPush.setPosition(0);
 
             telemetry.addData("RingCount", "%s", ringCountOnField);
             telemetry.addData("Robot Angle", "%.1f", robot.getRobotAngle());
             telemetry.addData("FLMotor-1", "%d ", robot.FLMotor.getCurrentPosition());
             telemetry.addData("status", "waiting for a start command...");
             telemetry.addData("currentTime", "%s", currentTime);
-            telemetry.addData("arm position", "%s", correct);
+            //telemetry.addData("arm position", "%s", correct);
             telemetry.update();
         }
+//        waitForStart();
 
-        runtime.reset();
-        currentTime = runtime.seconds();
-        waitForStart();
-        runtime.reset();
-        currentTime = runtime.seconds();
         angleOne = robot.getRobotAngle();
         while (opModeIsActive()) {
-            autonomousStep = 1;
-            //currentTime=14;
-            // Autonomous state machine is executed here
-            //ringFoundConfirmed = false;
 
             switch (autonomousStep) {
                 case 1:   // This is the start position
-                    // currentTime=0;
-                    //robot.moveRobot();
-                    ringCountOnField = "Quad";
-                    if (!ringFoundConfirmed) {
-                        //currentTime = robot.period.seconds();
+                     ringCountOnField = "Quad";
+                    if (!ringFoundConfirmed&&currentTime<2) {
                         robot.movePower = medSpeed;
                         robot.moveTarget = 12.0f;
                         robot.moveRobot();
-                        //currentTime = robot.period.seconds()
-                        autonomousStep = 300;
-                        //ringFoundConfirmed=true;
-                    } else {
-                        autonomousStep = 300;
+                        autonomousStep=300;
                     }
+                    autonomousStep=300;
                     break;
-                case 200:
+                    case 200:
                     if (robot.moveStep == 3) {
                         //storedMineralposition = visionSystem.getmineralPostion();
                         if ((robot.period.seconds() - currentTime > 10)) {
@@ -138,7 +127,7 @@ public class RedAuto extends LinearOpMode {
                         //prev. ringCountConfirmed
                         robot.movePower = -medSpeed;
                         robot.moveTarget = 15.0f;
-                        robot.strafe();
+                        robot.moveRobot();
                         autonomousStep = 301;
                     }
                     break;
@@ -159,16 +148,8 @@ public class RedAuto extends LinearOpMode {
                         robot.movePower = maxSpeed;
                         robot.moveTarget = 96.0f;
                         robot.moveRobot();
-                        autonomousStep = 400;
-                    /*
-                    if (robot.moveStep == 3) {
-                        robot.movePower = 0.1f;
-                        robot.moveTarget = 0.0f;
-                        robot.turn();
-                        autonomousStep = 3;
                     }
-                    */
-                    }
+                    autonomousStep = 400;
                     break;
 
 //strafes right
@@ -306,7 +287,9 @@ public class RedAuto extends LinearOpMode {
                     }
                     break;
 
+
             }
+
             if (currentTime < 30) {
 
                 currentTime = runtime.seconds();
@@ -321,21 +304,21 @@ public class RedAuto extends LinearOpMode {
             } else {
                 ringFoundConfirmed = true;
             }
-            robot.moveUpdate();
-            telemetry.addData("OpModeActive", "Running");
-            telemetry.addData("ringpush", "%d ", robot.ringPush.getPosition());
-            telemetry.addData("currentTime", "%s", currentTime);
-            telemetry.addData("Autonomous Step", "%d ", autonomousStep);
-            telemetry.addData("Runtime", "%s", runtime);
-            telemetry.addData("ringFoundConfirm", "%s", ringFoundConfirmed);
-            telemetry.addData("RingCount", "%s", ringCountOnField);
-            //telemetry.addData("RingCountLast", "%s", ringCountOnFieldLast);
-            telemetry.addData("Robot Angle", "%.1f", robot.getRobotAngle());
-            telemetry.addData("FLMotor-2", "%d ", robot.FLMotor.getCurrentPosition());
-            telemetry.update();
-          //  telemetry.addData("ringsShot", "%s", ringsShot);
+//                    robot.moveUpdate();
+                      telemetry.addData("OpModeActive", "Running");
+//                    telemetry.addData("ringpush", "%d ", robot.ringPush.getPosition());
+                      telemetry.addData("currentTime", "%s", currentTime);
+                      telemetry.addData("Autonomous Step", "%d ", autonomousStep);
+//                    telemetry.addData("Runtime", "%s", runtime);
+                      telemetry.addData("ringFoundConfirm", "%s", ringFoundConfirmed);
+                      telemetry.addData("RingCount", "%s", ringCountOnField);
+//                     telemetry.addData("RingCountLast", "%s", ringCountOnFieldLast);
+//                    telemetry.addData("Robot Angle", "%.1f", robot.getRobotAngle());
+//                    telemetry.addData("FLMotor-2", "%d ", robot.FLMotor.getCurrentPosition());
+                         telemetry.update();
+                      //  telemetry.addData("ringsShot", "%s", ringsShot);
 
+            }
         }
     }
-}
 //a = 5ft, b = 7ft, c = 9 ft
