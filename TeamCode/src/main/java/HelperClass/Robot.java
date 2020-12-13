@@ -88,7 +88,7 @@ public class Robot {
     public enum AutoStep {
         strafeStart, strafeStop, fwdMv, fwdMvStop, wbleMv, wbleMvStop, shootCont, end,
         dropwbl, wbleStart, wbleStop, launchlinestart , launchlinestop, launchlineend, launchlinestop2,
-        alignToShootRangeStart, alignToShootRangeStop, readyToShoot, shootStart, shootEnd, takePowerShoot
+        alignToShootRangeStart, alignToShootRangeStop, readyToShoot, shootStart, shootEnd, takePowerShoot, teleopAlign, park, teleopAlignStop
 
     }
 
@@ -144,6 +144,9 @@ public class Robot {
         BRMotor.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
         arm.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
 
+        shooting1.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
+        shooting2.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
+
         //FLMotor.setDirection(DcMotor.Direction.FORWARD);
         //BLMotor.setDirection(DcMotor.Direction.FORWARD);
         //FRMotor.setDirection(DcMotor.Direction.REVERSE);
@@ -153,9 +156,12 @@ public class Robot {
         FRMotor.setDirection(DcMotor.Direction.FORWARD);
         BRMotor.setDirection(DcMotor.Direction.FORWARD);
         intake.setDirection(DcMotor.Direction.FORWARD);
+
         shooting1.setDirection(DcMotor.Direction.FORWARD);
         shooting2.setDirection(DcMotor.Direction.REVERSE);
+
         arm.setDirection(DcMotor.Direction.REVERSE);
+
         //servos
         ringPush.setDirection(Servo.Direction.FORWARD);
         intakeHolder.setDirection(Servo.Direction.FORWARD);
@@ -167,20 +173,28 @@ public class Robot {
         FRMotor.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
         BRMotor.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
 
+        shooting1.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+        shooting2.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+
         arm.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+
         FLMotor.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
         BLMotor.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
         FRMotor.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
         BRMotor.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
         arm.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
+        shooting1.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
+        shooting2.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
 
         FLMotor.setZeroPowerBehavior(DcMotorEx.ZeroPowerBehavior.BRAKE);
         BLMotor.setZeroPowerBehavior(DcMotorEx.ZeroPowerBehavior.BRAKE);
         FRMotor.setZeroPowerBehavior(DcMotorEx.ZeroPowerBehavior.BRAKE);
         BRMotor.setZeroPowerBehavior(DcMotorEx.ZeroPowerBehavior.BRAKE);
         intake.setZeroPowerBehavior(DcMotorEx.ZeroPowerBehavior.BRAKE);
+
         shooting1.setZeroPowerBehavior(DcMotorEx.ZeroPowerBehavior.BRAKE);
         shooting2.setZeroPowerBehavior(DcMotorEx.ZeroPowerBehavior.BRAKE);
+
         arm.setZeroPowerBehavior(DcMotorEx.ZeroPowerBehavior.BRAKE);
 
 
@@ -307,6 +321,7 @@ public class Robot {
     }
 
     public void mvlaunchLine(float straightLD, float straightspeed, float sideLD, float sidespeedL) {
+        //straight launch distance robot
         straightLDR = straightLD;
         straightspeedR = straightspeed;
         sideLDR = sideLD;
@@ -322,6 +337,63 @@ public class Robot {
 
 
         switch (autostep){
+
+//            case teleopAlign:
+//                angleLast = getRobotAngle();
+//                if (360 - angleLast < 90) {
+//                    FLMotor.setPower(0.2);
+//                    BLMotor.setPower(0.2);
+//                    FRMotor.setPower(-0.2);
+//                    BRMotor.setPower(-0.2);
+//                    autostep = AutoStep.teleopAlignStop;
+//
+//                } else if (angleLast - 0 < 90) {
+//                    FLMotor.setPower(-0.2);
+//                    BLMotor.setPower(-0.2);
+//                    FRMotor.setPower(0.2);
+//                    BRMotor.setPower(0.2);
+//                    autostep = AutoStep.teleopAlignStop;
+//                }
+//                break;
+//
+//            case teleopAlignStop:
+//                if (360 - angleLast  <= 1) {
+//                    FLMotor.setPower(0);
+//                    BLMotor.setPower(0);
+//                    FRMotor.setPower(0);
+//                    BRMotor.setPower(0);
+//                    FLMotor.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+//                    BLMotor.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+//                    FRMotor.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+//                    BRMotor.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+//
+//                    FLMotor.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
+//                    BLMotor.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
+//                    FRMotor.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
+//                    BRMotor.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
+//                    autostep = AutoStep.readyToShoot;
+//
+//                } else if (angleLast - 0 <= 1) {
+//                    FLMotor.setPower(0);
+//                    BLMotor.setPower(0);
+//                    FRMotor.setPower(0);
+//                    BRMotor.setPower(0);
+//                    FLMotor.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+//                    BLMotor.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+//                    FRMotor.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+//                    BRMotor.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+//
+//                    FLMotor.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
+//                    BLMotor.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
+//                    FRMotor.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
+//                    BRMotor.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
+//                    autostep = AutoStep.end;
+//
+//                } else {
+//                    autostep = AutoStep.teleopAlign;
+//                }
+//                break;
+
 
             case strafeStart:
                 FLMotor.setPower(strafeSpeed);
@@ -424,7 +496,7 @@ public class Robot {
             case wbleStart:
                 runtime1.reset();
                 currentTime1 = runtime1.seconds();
-                arm.setPower(-0.15);
+                arm.setPower(-0.25);
                 SystemClock.sleep(1000);
                 arm.setPower(0);
                 autostep=AutoStep.dropwbl;
@@ -441,12 +513,12 @@ public class Robot {
                 break;
 
             case wbleStop:
-                arm.setPower(0.2);
+                arm.setPower(0.3);
                 SystemClock.sleep(500);
                 arm.setPower(0);
                 claw.setPosition(0.5);
                 autostep = AutoStep.launchlinestart;
-            break;
+                break;
 
             case end:
                 break;
@@ -465,6 +537,7 @@ public class Robot {
                     BLMotor.setPower(0);
                     FRMotor.setPower(0);
                     BRMotor.setPower(0);
+
                     FLMotor.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
                     BLMotor.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
                     FRMotor.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
@@ -475,15 +548,18 @@ public class Robot {
                     FRMotor.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
                     BRMotor.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
                     strafeStartDist = 0;
-                    autostep = AutoStep.end;
-                    if(straightLDR>0){
-                        autostep= AutoStep.launchlineend;
+                    if(straightLDR==0){
+                        autostep= AutoStep.alignToShootRangeStart;
+                    }
+                    else{
+                        autostep = AutoStep.launchlinestop2;
                     }
                 }
                 else{
                     autostep = AutoStep.launchlinestart;
                 }
                 break;
+
 
             case launchlineend:
                 FLMotor.setPower(straightspeedR);
@@ -578,54 +654,60 @@ public class Robot {
                 } else {
                     autostep = AutoStep.alignToShootRangeStop;
                 }
-
                 break;
 
             case readyToShoot:
-
                 SystemClock.sleep(1000);
                 autostep = AutoStep.shootStart;
-
                 break;
 
             case shootStart:
-                //ringPush.setPosition(0);
-                shooting1.setPower(-0.8);
-                shooting2.setPower(-0.8);
-                SystemClock.sleep(500);
-                ringPush.setPosition(1);
+//                ringPush.setPosition(0);
+                shooting1.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
+                shooting2.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
+                shooting1.setPower(-0.745);
+                shooting2.setPower(-0.745);
+                SystemClock.sleep(2500);
+                ringPush.setPosition(0.8);
                 SystemClock.sleep(1000);
                 ringPush.setPosition(0);
                 SystemClock.sleep(1000);
-                ringPush.setPosition(1);
+                ringPush.setPosition(0.8);
                 SystemClock.sleep(1000);
                 ringPush.setPosition(0);
-                intake.setPower(-2);
+//                intake.setPower(-2);
                 SystemClock.sleep(1000);
-                ringPush.setPosition(1);
+                ringPush.setPosition(0.8);
+                SystemClock.sleep(1000);
                 autostep=AutoStep.shootEnd;
                 break;
 
             case takePowerShoot:
-
-
-
                 break;
 
             case shootEnd:
-                SystemClock.sleep(2000);
+//               SystemClock.sleep(500);
                 shooting1.setPower(0);
                 shooting2.setPower(0);
+                autostep=AutoStep.park;
+                break;
+
+            case park:
+                FLMotor.setPower(0.5);
+                BLMotor.setPower(0.5);
+                FRMotor.setPower(0.5);
+                BRMotor.setPower(0.5);
+                SystemClock.sleep(750);
+                FLMotor.setPower(0);
+                BLMotor.setPower(0);
+                FRMotor.setPower(0);
+                BRMotor.setPower(0);
                 autostep=AutoStep.end;
                 break;
 
 
         }
-
-
     }
-
-
 }
 
 

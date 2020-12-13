@@ -53,7 +53,7 @@ public class Vortex14969RedAutonomous extends LinearOpMode {
 
     //enum vars defined
     public enum Step {confirmation, startMv, checkRings, mvBack, mvForward, mvStrafe, dropWobble, shootRing,
-        launchLine, quad, single, none, angleAdj
+        launchLine, quad, single, none, angleAdj, park
     }
     public Step step = Step.confirmation;
 
@@ -102,7 +102,6 @@ public class Vortex14969RedAutonomous extends LinearOpMode {
             switch (step) {
                 case confirmation:
                     if (ringCountOnField == ringCountOnFieldLast && ringFoundConfirmed) {
-                        //step = Step.mvStrafe;
                         step = Step.startMv;
                     }
                     break;
@@ -111,7 +110,7 @@ public class Vortex14969RedAutonomous extends LinearOpMode {
                     if (ringCountOnField == "Zero") {
                         fwdDist = 38;
                         speed = medSpeed;
-                        sideDist = 27.0f;
+                        sideDist = 25.0f;
                         robot.mvDestination(fwdDist, speed, sideDist);
                     }
 
@@ -136,28 +135,28 @@ public class Vortex14969RedAutonomous extends LinearOpMode {
                     break;
 
                    case launchLine:
-                   if (ringCountOnField=="Zero"){
-                      straightLD = 0.0f;
-                      straightspeed = 0.0f;
-                      sideLD = 15.0f;
-                      sidespeedL = -0.5f;
-                      robot.mvlaunchLine(straightLD, straightspeed, sideLD, sidespeedL);
-                  }
-                  else if (ringCountOnField=="Single"){
-                    straightLD = 0.0f;
-                    straightspeed = 0.0f;
-                    sideLD = 15.0f;
-                    sidespeedL = -0.5f;
-                    robot.mvlaunchLine(straightLD, straightspeed, sideLD, sidespeedL);
-                  }
-                  else if (ringCountOnField=="Quad"){
-                    straightLD = 28.5f;
-                    straightspeed = -0.75f;
-                    sideLD = 15.0f;
-                    sidespeedL = -0.5f;
-                    robot.mvlaunchLine(straightLD, straightspeed, sideLD, sidespeedL);
+                        if (ringCountOnField=="Zero"){
+                            straightLD = 1.0f;
+                            straightspeed = 0.25f;
+                            sideLD = 15.0f;
+                            sidespeedL = -0.5f;
+                            robot.mvlaunchLine(straightLD, straightspeed, sideLD, sidespeedL);
+                        }
+                        else if (ringCountOnField=="Single"){
+                            straightLD = 5.0f;
+                            straightspeed = -0.75f;
+                            sideLD = 0.5f;
+                            sidespeedL = 0.5f;
+                            robot.mvlaunchLine(straightLD, straightspeed, sideLD, sidespeedL);
+                        }
+                        else if (ringCountOnField=="Quad"){
+                            straightLD = 27.0f;
+                            straightspeed = -0.75f;
+                            sideLD = 15.0f;
+                            sidespeedL = -0.5f;
+                            robot.mvlaunchLine(straightLD, straightspeed, sideLD, sidespeedL);
 
-                  }
+                            }
                 step = Step.angleAdj;
                 break;
 
@@ -167,11 +166,13 @@ public class Vortex14969RedAutonomous extends LinearOpMode {
                     break;
 
                 case shootRing:
-                break;
+                    break;
 
 
                 case none:
                     break;
+
+
 
             }
 
