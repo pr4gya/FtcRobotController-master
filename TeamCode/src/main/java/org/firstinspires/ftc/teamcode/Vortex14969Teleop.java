@@ -62,11 +62,14 @@ public class Vortex14969Teleop extends LinearOpMode {
             double bl_power = move_y_axis - move_x_axis + pivot_turn;
             double fr_power = move_y_axis - move_x_axis - pivot_turn;
             double br_power = move_y_axis + move_x_axis - pivot_turn;
+            double shootPower = 0;
+
             //now we can set the powers
             robot.FLMotor.setPower(fl_power);
             robot.BLMotor.setPower(bl_power);
             robot.FRMotor.setPower(fr_power);
             robot.BRMotor.setPower(br_power);
+
 
             //when button is held, intake spins. When button released, then intake stops all motion
             float reverseIntake = gamepad2.left_trigger;
@@ -109,7 +112,7 @@ public class Vortex14969Teleop extends LinearOpMode {
             }
             else if (gamepad2.b){
                 robot.arm.setTargetPosition(-1);
-                robot.arm.setPower(-0.10);
+                robot.arm.setPower(-0.25);
             }
             else{
                 robot.arm.setTargetPosition(0);
@@ -117,25 +120,33 @@ public class Vortex14969Teleop extends LinearOpMode {
                 robot.arm.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
             }
 
-            double shootPower = -0.769;
             if (gamepad2.dpad_right) {
-                shootPower += 0.1;
+                shootPower = -0.8;
             }
             if (gamepad2.dpad_left) {
-                shootPower -= -0.1;
+                shootPower = -0.5;
             }
 
 
             if (ifShoot) {
+                robot.shooting1.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
+                robot.shooting2.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
                 robot.shooting1.setPower(shootPower);
                 robot.shooting2.setPower(shootPower);
             }
 
 
             if (ifShoot == false) {
+                robot.shooting1.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
+                robot.shooting2.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
                 robot.shooting1.setPower(0);
                 robot.shooting2.setPower(0);
             }
+
+
+//            if(gamepad1.b){
+//                robot.adjustAngle();
+//            }
 
 
             boolean intakeHolder = gamepad2.x;
@@ -147,9 +158,9 @@ public class Vortex14969Teleop extends LinearOpMode {
 
             boolean ringPush = gamepad2.y;
             if (gamepad2.y) {
-                robot.ringPush.setPosition(0.2);
+                robot.ringPush.setPosition(1);
             } else {
-                robot.ringPush.setPosition(0.0);
+                robot.ringPush.setPosition(0.8);
             }
 
 
