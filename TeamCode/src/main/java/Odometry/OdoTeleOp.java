@@ -1,16 +1,11 @@
-package org.firstinspires.ftc.teamcode;
+package Odometry;
 
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
-import HelperClass.OdoRobot;
+
 import Hardware.DriveTrainNew;
-import InTakeHelper.ControllerB;
 
-import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.util.ElapsedTime;
-import com.qualcomm.robotcore.util.Range;
-
-import org.firstinspires.ftc.robotcore.external.navigation.DistanceUnit;
 
 
 @TeleOp(name="Odometry TeleOp", group="Pushbot")
@@ -81,6 +76,10 @@ public class OdoTeleOp extends LinearOpMode {
 //            telemetry.addData("Robot Angle: ", "%f", robot.getRobotAngle());
 //            telemetry.addData("Rotation", "%f ", robot.getRobotAngle());
             telemetry.addLine("running");
+            telemetry.addData("Left Odometer Encoder", "%s", robot.BRMotor.getCurrentPosition());
+            telemetry.addData("Right Odometer Encoder", "%s", robot.FLMotor.getCurrentPosition());
+            telemetry.addData("Center Odometer Encoder", "%s", robot.FRMotor.getCurrentPosition());
+
             telemetry.update();
 
 

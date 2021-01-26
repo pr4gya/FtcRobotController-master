@@ -1,15 +1,16 @@
-package org.firstinspires.ftc.teamcode;
+package Odometry;
 
-import com.arcrobotics.ftclib.kinematics.HolonomicOdometry;
 import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
 import com.qualcomm.robotcore.eventloop.opmode.Disabled;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
+
+import HelperClass.Robot;
 
 @Autonomous
 @Disabled
 public class AutoStaticRobotPose extends LinearOpMode {
 
-    private MotorEx leftEncoder, rightEncoder, perpEncoder;
+    private Robot leftEncoder, rightEncoder, perpEncoder;
     private HolonomicOdometry odometry;
 
     public static final double TRACKWIDTH = 14.31;
@@ -21,7 +22,7 @@ public class AutoStaticRobotPose extends LinearOpMode {
 
     @Override
     public void runOpMode() throws InterruptedException {
-        leftEncoder = new MotorEx(hardwareMap, "left odometer");
+        leftEncoder = new Robot(hardwareMap, "left odometer");
         rightEncoder = new MotorEx(hardwareMap, "right odometer");
         perpEncoder = new MotorEx(hardwareMap, "center odometer");
 

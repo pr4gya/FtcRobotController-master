@@ -3,7 +3,6 @@ import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 import HelperClass.Robot;
 import Hardware.DriveTrainNew;
-import InTakeHelper.ControllerB;
 
 import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.util.ElapsedTime;
@@ -36,7 +35,7 @@ public class Vortex14969Teleop extends LinearOpMode {
 
         while (!opModeIsActive() && !isStopRequested()) {
             int correct = robot.arm.getCurrentPosition();
-            robot.claw.setPosition(0);
+            robot.claw.setPosition(-1);
             telemetry.addData("Rotation", "%f ", robot.getRobotAngle());
             telemetry.update();
 
@@ -62,7 +61,7 @@ public class Vortex14969Teleop extends LinearOpMode {
             double bl_power = move_y_axis - move_x_axis + pivot_turn;
             double fr_power = move_y_axis - move_x_axis - pivot_turn;
             double br_power = move_y_axis + move_x_axis - pivot_turn;
-            double shootPower = 0;
+            double shootPower = 0.6;
 
             //now we can set the powers
             robot.FLMotor.setPower(fl_power);
@@ -101,9 +100,9 @@ public class Vortex14969Teleop extends LinearOpMode {
 //            robot.claw.setPosition(clawPosition);
 
             if (gamepad2.right_trigger > 0) {
-                robot.claw.setPosition(0);
+                robot.claw.setPosition(1);
             } else {
-                robot.claw.setPosition(0.8);
+                robot.claw.setPosition(-1);
             }
 
             if (gamepad2.a) {
@@ -160,7 +159,7 @@ public class Vortex14969Teleop extends LinearOpMode {
             if (gamepad2.y) {
                 robot.ringPush.setPosition(1);
             } else {
-                robot.ringPush.setPosition(0.8);
+                robot.ringPush.setPosition(-1);
             }
 
 
