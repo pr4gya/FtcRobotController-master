@@ -1,22 +1,18 @@
-package org.firstinspires.ftc.teamcode;
+package Odometry;
 
 package org.firstinspires.ftc.teamcode;
 
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
-import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
-import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
 
 
-import java.util.ArrayList;
+import Odometry.PositionTracker;
 
-
-import HelperClass.Robot;
-import HelperClass.RobotVision;
 import com.arcrobotics.ftclib.kinematics.HolonomicOdometry;
+import com.qualcomm.robotcore.hardware.DcMotorEx;
 
 public class TeleStaticRobotPose extends LinearOpMode {
 
-    private MotorEx leftEncoder, rightEncoder, perpEncoder;
+    private DcMotorEx leftEncoder, rightEncoder, perpEncoder;
     private HolonomicOdometry odometry;
 
     public static final double TRACKWIDTH = 14.31;
@@ -28,8 +24,10 @@ public class TeleStaticRobotPose extends LinearOpMode {
 
     @Override
     public void runOpMode() throws InterruptedException {
-        leftEncoder = new MotorEx(hardwareMap, "left odometer");
-        rightEncoder = new MotorEx(hardwareMap, "right odometer");
+        leftEncoder = new DcMotorEx(hardwareMap, "left odometer") {
+        };
+        rightEncoder = new DcMotorEx(hardwareMap, "right odometer") {
+        };
         perpEncoder = new MotorEx(hardwareMap, "center odometer");
 
         leftEncoder.setDistancePerPulse(DISTANCE_PER_PULSE);

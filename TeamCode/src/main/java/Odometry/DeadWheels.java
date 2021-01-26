@@ -1,4 +1,4 @@
-package org.firstinspires.ftc.teamcode;
+package Odometry;
 
 import com.arcrobotics.ftclib.drivebase.MecanumDrive;
 import com.arcrobotics.ftclib.hardware.motors.Motor;
@@ -8,6 +8,9 @@ import com.arcrobotics.ftclib.kinematics.HolonomicOdometry;
 import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
 import com.qualcomm.robotcore.eventloop.opmode.Disabled;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
+
+import Hardware.DriveTrainNew;
+import HelperClass.Robot;
 
 /**
  * This sample shows how to use dead wheels with external encoders
@@ -37,10 +40,10 @@ public class DeadWheels extends LinearOpMode {
     public static final double TICKS_PER_REV = 8192;
     public static final double DISTANCE_PER_PULSE = Math.PI * WHEEL_DIAMETER / TICKS_PER_REV;
 
-    private MotorEx frontLeft, frontRight, backLeft, backRight;
-    private MecanumDrive driveTrain;
-    private Motor intakeLeft, intakeRight, liftLeft, liftRight;
-    private Encoder leftOdometer, rightOdometer, centerOdometer;
+    private Robot FLMotor, FRMotor, BLMotor, BRMotor;
+    private DriveTrainNew driveTrain;
+    private Robot intake, shooting1, shooting2, arm;
+    private Robot leftOdometer, rightOdometer, centerOdometer;
     private HolonomicOdometry odometry;
 
     @Override

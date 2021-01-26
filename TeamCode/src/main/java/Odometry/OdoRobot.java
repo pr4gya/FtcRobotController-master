@@ -1,4 +1,4 @@
-package HelperClass;
+package Odometry;
 
 import android.os.SystemClock;
 
@@ -18,9 +18,14 @@ import java.util.concurrent.TimeUnit;
 
 import HelperClass.Robot;
 
-public class OdoRobot
-{
-public DcMotor FLMotor = null;
+public class OdoRobot {
+    public static boolean usingComputer = true;
+    /**
+     * creates simulation
+     */
+
+
+    public DcMotor FLMotor = null;
 public DcMotor FRMotor = null;
 public DcMotor BLMotor = null;
 public DcMotor BRMotor = null;
@@ -66,7 +71,24 @@ public enum AutoStep {
 
 
     public void OdoRobot() {
+        worldXPosition = 50;
+        worldYPosition = 50;
+        worldAngle_rad = Math.toRadians(-180);
+    }
+    private double xSpeed = 0;
+    private double ySpeed = 0;
+    private double turnSpeed = 0;
 
+    public static double worldXPosition;
+    public static double worldYPosition;
+    public static double worldAngle_rad;
+
+    public double getXPos(){
+        return worldXPosition;
+    }
+
+    public double getYPos(){
+        return worldYPosition;
     }
 
     public void setrobotradius(double rad) {
@@ -88,17 +110,15 @@ public enum AutoStep {
 //        frontRange = hwMap.get(DistanceSensor.class, "range_front");
         // I2C Port - 1 Red Wall Range Sensor connected
 //        redWallRange = hwMap.get(DistanceSensor.class, "range_red_wall");
-
-
         //FLMotor = hwMap.get(DcMotor.class, "FLMotor");
         //BLMotor = hwMap.get(DcMotor.class, "BLMotor");
         //FRMotor = hwMap.get(DcMotor.class, "FRMotor");
         //BRMotor = hwMap.get(DcMotor.class, "BRMotor");
 
-        FLMotor.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
-        BLMotor.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
-        FRMotor.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
-        BRMotor.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
+        FLMotor.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
+        BLMotor.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
+        FRMotor.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
+        BRMotor.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
 
         //FLMotor.setDirection(DcMotor.Direction.FORWARD);
         //BLMotor.setDirection(DcMotor.Direction.FORWARD);
@@ -110,15 +130,7 @@ public enum AutoStep {
         BRMotor.setDirection(DcMotor.Direction.FORWARD);
 
 
-        FLMotor.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
-        BLMotor.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
-        FRMotor.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
-        BRMotor.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
 
-        FLMotor.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
-        BLMotor.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
-        FRMotor.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
-        BRMotor.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
 
         FLMotor.setZeroPowerBehavior(DcMotorEx.ZeroPowerBehavior.BRAKE);
         BLMotor.setZeroPowerBehavior(DcMotorEx.ZeroPowerBehavior.BRAKE);
@@ -135,177 +147,7 @@ public enum AutoStep {
         parameters.useExternalCrystal   = true;
         parameters.mode                 = BNO055IMU.SensorMode.IMU;
         parameters.loggingTag           = "IMU";
-//        imu                             = hwMap.get(BNO055IMU.class, "imu");
-//
-//        // Since our Rev Expansion is in Vertical Position, so we need to Z & X
-//
-//        //Need to be in CONFIG mode to write to registers
-//        imu.write8(BNO055IMU.Register.OPR_MODE,BNO055IMU.SensorMode.CONFIG.bVal & 0x0F);
-//        byte AXIS_MAP_CONFIG_BYTE = 0x6; //This is what to write to the AXIS_MAP_CONFIG register to swap x and z axes
-//        byte AXIS_MAP_SIGN_BYTE = 0x1; //This is what to write to the AXIS_MAP_SIGN register to negate the z axis
-//        //Need to be in CONFIG mode to write to registers
-//        imu.write8(BNO055IMU.Register.OPR_MODE,BNO055IMU.SensorMode.CONFIG.bVal & 0x0F);
-//        TimeUnit.MILLISECONDS.sleep(100); //Changing modes requires a delay before doing anything else
-//
-//        //Write to the AXIS_MAP_CONFIG register
-//        imu.write8(BNO055IMU.Register.AXIS_MAP_CONFIG,AXIS_MAP_CONFIG_BYTE & 0x0F);
-//
-//        //Write to the AXIS_MAP_SIGN register
-//        imu.write8(BNO055IMU.Register.AXIS_MAP_SIGN,AXIS_MAP_SIGN_BYTE & 0x0F);
-//
-//        //Need to change back into the IMU mode to use the gyro
-//        imu.write8(BNO055IMU.Register.OPR_MODE,BNO055IMU.SensorMode.IMU.bVal & 0x0F);
-//
-//        TimeUnit.MILLISECONDS.sleep(100); //Changing modes again requires a delay
-//
-//        imu.initialize(parameters);
-//
-//
-//    }
 
-//    public void setupStartPosition () throws InterruptedException {
-//
-//        // TODO: Lift wobbleGoal , Shoot, Intake motors to be setup here
-//
-//        BNO055IMU.Parameters parameters = new BNO055IMU.Parameters();
-//        parameters.angleUnit            = BNO055IMU.AngleUnit.DEGREES;
-//        parameters.accelUnit            = BNO055IMU.AccelUnit.METERS_PERSEC_PERSEC;
-//        parameters.loggingEnabled       = true;
-//        parameters.useExternalCrystal   = true;
-//        parameters.mode                 = BNO055IMU.SensorMode.IMU;
-//        parameters.loggingTag           = "IMU";
-//        imu                             = hwMap.get(BNO055IMU.class, "imu");
-//
-//        //Need to be in CONFIG mode to write to registers
-//        imu.write8(BNO055IMU.Register.OPR_MODE,BNO055IMU.SensorMode.CONFIG.bVal & 0x0F);
-//        byte AXIS_MAP_CONFIG_BYTE = 0x6; //This is what to write to the AXIS_MAP_CONFIG register to swap x and z axes
-//        byte AXIS_MAP_SIGN_BYTE = 0x1; //This is what to write to the AXIS_MAP_SIGN register to negate the z axis
-//        //Need to be in CONFIG mode to write to registers
-//        imu.write8(BNO055IMU.Register.OPR_MODE,BNO055IMU.SensorMode.CONFIG.bVal & 0x0F);
-//        TimeUnit.MILLISECONDS.sleep(100); //Changing modes requires a delay before doing anything else
-//
-//        //Write to the AXIS_MAP_CONFIG register
-//        imu.write8(BNO055IMU.Register.AXIS_MAP_CONFIG,AXIS_MAP_CONFIG_BYTE & 0x0F);
-//
-//        //Write to the AXIS_MAP_SIGN register
-//        imu.write8(BNO055IMU.Register.AXIS_MAP_SIGN,AXIS_MAP_SIGN_BYTE & 0x0F);
-//
-//        //Need to change back into the IMU mode to use the gyro
-//        imu.write8(BNO055IMU.Register.OPR_MODE,BNO055IMU.SensorMode.IMU.bVal & 0x0F);
-//
-//        TimeUnit.MILLISECONDS.sleep(100); //Changing modes again requires a delay
-//
-//        imu.initialize(parameters);
-//    }
-
-
-
-//    public void moveRobot () {
-////        FLMotor.setPower(0.25);
-////        BLMotor.setPower(0.25);
-////        FRMotor.setPower(0.25);
-////        BRMotor.setPower(0.25);
-//        moveStep = 1;
-//    }
-//
-//
-//
-//    public void strafe()  {
-//        moveStep = 6;
-//    }
-//    public void strafe2(){
-//        moveStep = 40;
-//    }
-//    public void mvFwd(){
-//        moveStep = 41;
-//    }
-//    public void shoot(){
-//        moveStep = 31;
-//    }
-//    public void intake(){
-//        moveStep = 30;
-//    }
-//
-//
-//
-//    public void adjustAngle () {
-//
-//    }
-//    public void moveUpdate() throws InterruptedException {
-//
-//
-//        switch (autostep){
-//
-//
-//
-//            case end:
-//                break;
-//
-
-//            case alignToShootRangeStart:
-//
-//                angleLast = getRobotAngle();
-//
-//                if (360 - angleLast < 90) {
-//                    FLMotor.setPower(0.2);
-//                    BLMotor.setPower(0.2);
-//                    FRMotor.setPower(-0.2);
-//                    BRMotor.setPower(-0.2);
-//                    autostep = Robot.AutoStep.alignToShootRangeStop;
-//
-//                } else if (angleLast - 0 < 90) {
-//                    FLMotor.setPower(-0.2);
-//                    BLMotor.setPower(-0.2);
-//                    FRMotor.setPower(0.2);
-//                    BRMotor.setPower(0.2);
-//                    autostep = Robot.AutoStep.alignToShootRangeStop;
-//                }
-//
-//
-//                break;
-//
-//
-//            case alignToShootRangeStop:
-//
-//                angleLast = getRobotAngle();
-//
-//                if (360 - angleLast  <= 1) {
-//                    FLMotor.setPower(0);
-//                    BLMotor.setPower(0);
-//                    FRMotor.setPower(0);
-//                    BRMotor.setPower(0);
-//                    FLMotor.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
-//                    BLMotor.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
-//                    FRMotor.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
-//                    BRMotor.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
-//
-//                    FLMotor.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
-//                    BLMotor.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
-//                    FRMotor.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
-//                    BRMotor.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
-//                    autostep = Robot.AutoStep.readyToShoot;
-//
-//                } else if (angleLast - 0 <= 1) {
-//                    FLMotor.setPower(0);
-//                    BLMotor.setPower(0);
-//                    FRMotor.setPower(0);
-//                    BRMotor.setPower(0);
-//                    FLMotor.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
-//                    BLMotor.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
-//                    FRMotor.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
-//                    BRMotor.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
-//
-//                    FLMotor.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
-//                    BLMotor.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
-//                    FRMotor.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
-//                    BRMotor.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
-//                    autostep = Robot.AutoStep.readyToShoot;
-//
-//                } else {
-//                    autostep = Robot.AutoStep.alignToShootRangeStop;
-//                }
-//
-//                break;
 
 
         }
