@@ -1,4 +1,4 @@
-package OdometryResources.geometry;
+package Odometry.geometry;
 
 /**
  * Represents a transformation for a Pose2d.

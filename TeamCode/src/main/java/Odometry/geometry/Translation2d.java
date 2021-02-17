@@ -1,4 +1,4 @@
-package OdometryResources.geometry;
+package Odometry.geometry;
 
 public class Translation2d {
     private final double m_x;

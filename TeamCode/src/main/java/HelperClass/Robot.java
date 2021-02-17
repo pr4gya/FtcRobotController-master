@@ -138,14 +138,14 @@ public class Robot {
         //FRMotor = hwMap.get(DcMotor.class, "FRMotor");
         //BRMotor = hwMap.get(DcMotor.class, "BRMotor");
 
-        FLMotor.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
-        BLMotor.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
-        FRMotor.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
-        BRMotor.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
-        arm.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
+        //FLMotor.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
+        //BLMotor.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
+        //FRMotor.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
+        //BRMotor.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
+        //arm.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
 
-        shooting1.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
-        shooting2.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
+        //shooting1.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
+        //shooting2.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
 
         //FLMotor.setDirection(DcMotor.Direction.FORWARD);
         //BLMotor.setDirection(DcMotor.Direction.FORWARD);
@@ -168,23 +168,23 @@ public class Robot {
         claw.setDirection(Servo.Direction.FORWARD);
         claw.setPosition(CLAW_HOME);
 
-        FLMotor.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
-        BLMotor.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
-        FRMotor.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
-        BRMotor.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+//        FLMotor.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+//        BLMotor.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+//        FRMotor.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+//        BRMotor.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+//
+//        shooting1.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+//        shooting2.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+//
+//        arm.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
 
-        shooting1.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
-        shooting2.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
-
-        arm.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
-
-        FLMotor.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
-        BLMotor.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
-        FRMotor.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
-        BRMotor.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
-        arm.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
-        shooting1.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
-        shooting2.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
+//        FLMotor.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
+//        BLMotor.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
+//        FRMotor.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
+//        BRMotor.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
+//        arm.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
+//        shooting1.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
+//        shooting2.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
 
         FLMotor.setZeroPowerBehavior(DcMotorEx.ZeroPowerBehavior.BRAKE);
         BLMotor.setZeroPowerBehavior(DcMotorEx.ZeroPowerBehavior.BRAKE);

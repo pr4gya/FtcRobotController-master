@@ -36,6 +36,7 @@ public class Vortex14969Teleop extends LinearOpMode {
         while (!opModeIsActive() && !isStopRequested()) {
             int correct = robot.arm.getCurrentPosition();
             robot.claw.setPosition(-1);
+            robot.ringPush.setPosition(1); // Ring Push mechanism is set to start position
             telemetry.addData("Rotation", "%f ", robot.getRobotAngle());
             telemetry.update();
 
@@ -119,17 +120,18 @@ public class Vortex14969Teleop extends LinearOpMode {
                 robot.arm.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
             }
 
-            if (gamepad2.dpad_right) {
-                shootPower = -0.8;
-            }
-            if (gamepad2.dpad_left) {
-                shootPower = -0.5;
-            }
+            //if (gamepad2.dpad_right) {
+            //    shootPower = 0.8;
+            //}
+            //if (gamepad2.dpad_left) {
+            //    shootPower = -0.5;
+            //}
 
 
             if (ifShoot) {
-                robot.shooting1.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
-                robot.shooting2.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
+                //robot.shooting1.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
+                //robot.shooting2.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
+                shootPower = -0.6;
                 robot.shooting1.setPower(shootPower);
                 robot.shooting2.setPower(shootPower);
             }
@@ -157,10 +159,11 @@ public class Vortex14969Teleop extends LinearOpMode {
 
             boolean ringPush = gamepad2.y;
             if (gamepad2.y) {
-                robot.ringPush.setPosition(1);
-            } else {
                 robot.ringPush.setPosition(-1);
+            } else {
+                robot.ringPush.setPosition(1);
             }
+
 
 
             //robot.intakeHolder.setDirection(2);

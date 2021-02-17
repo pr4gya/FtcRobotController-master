@@ -1,4 +1,4 @@
-package OdometryResources.geometry;
+package Odometry.geometry;
 
 /*----------------------------------------------------------------------------*/
 /* Copyright (c) 2019 FIRST. All Rights Reserved.                             */
