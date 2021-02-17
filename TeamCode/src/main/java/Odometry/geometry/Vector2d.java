@@ -1,4 +1,4 @@
-package OdometryResources.geometry;
+package Odometry.geometry;
 
 /**
  * Think of a vector as a ray with a starting point at the origin.

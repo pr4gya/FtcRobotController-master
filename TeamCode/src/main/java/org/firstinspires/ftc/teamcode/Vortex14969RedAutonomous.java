@@ -13,6 +13,7 @@ import HelperClass.RobotVision;
 @Autonomous(name="Red Autonomous", group="Linear Opmode")
 public class Vortex14969RedAutonomous extends LinearOpMode {
 
+
     //calls helper classes
     public RobotVision rVision;
  //   public Robot robot;
@@ -212,4 +213,5 @@ public class Vortex14969RedAutonomous extends LinearOpMode {
 
         }
     }
+
 }

@@ -1,4 +1,4 @@
-package OdometryResources.geometry;
+package Odometry.geometry;
 
 /**
  * A change in distance along arc since the last pose update. We can use ideas
