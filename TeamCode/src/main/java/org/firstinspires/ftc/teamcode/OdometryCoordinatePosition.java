@@ -6,6 +6,7 @@ import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.Servo;
 import com.qualcomm.robotcore.util.ElapsedTime;
 import com.qualcomm.robotcore.util.Range;
+import HelperClass.Constants;
 
 public class OdometryCoordinatePosition implements Runnable {
 
@@ -15,11 +16,11 @@ public class OdometryCoordinatePosition implements Runnable {
     private DcMotor rightEncoderMotor;
     private DcMotor centerEncoderMotor;
 
-    private static final double oneRotationTicks = 8192;
-    private static final double countsPerInch = 1304.45;
-    private static final double wheelRadius = 1.0; // In INCH
-    private static final double wheelDistanceApart = 15.2; // in INCH
-    private static final double horizontalTicksPerRadian = 275;
+    private static final double oneRotationTicks = Constants.ODOMETRY_TICKS_PER_REV;
+    private static final double countsPerInch = Constants.ODOMETRY_COUNTS_PER_INCH;
+    private static final double wheelRadius = Constants.ODOMETRY_WHEEL_RADIUS; // In INCH
+    private static final double wheelDistanceApart = Constants.ODOMETRY_WHEEL_DISTANCE_INCH; // in INCH
+    private static final double horizontalTicksPerRadian = Constants.HORIZONTAL_TICKS_PER_RAD;
 
     //Thead run condition
     private boolean isRunning = true;
@@ -31,14 +32,14 @@ public class OdometryCoordinatePosition implements Runnable {
     private int lastLeftEncoderPos = 0;
     private int lastCenterEncoderPos = 0;
     private int lastRightEncoderPos = 0;
-    private double deltaLeftDistance = 0;
-    private double deltaRightDistance = 0;
-    private double deltaCenterDistance = 0;
+    private double deltaLeftPos = 0;
+    private double deltaRightPos = 0;
+    private double deltaCenterPos = 0;
     private double x = 0;
     private double y = 0;
     private double theta = 0; // Robot orintation in Radians
-    private double robotOrientationRadians = 0;
-    private double changeInRobotOrientation = 0;  // Change in CenterEncode position
+    private double robotAngleInRadians = 0;
+    private double changeInRobotAngle = 0;  // Change in CenterEncode position
 
     //private double verticalRightEncoderWheelPosition = 0, verticalLeftEncoderWheelPosition = 0, normalEncoderWheelPosition = 0,  changeInRobotOrientation = 0;
     //private double robotGlobalXCoordinatePosition = 0, robotGlobalYCoordinatePosition = 0, robotOrientationRadians = 0;
@@ -84,31 +85,35 @@ public class OdometryCoordinatePosition implements Runnable {
         //Get Current Positions
         leftEncoderPos = (leftEncoderMotor.getCurrentPosition() * leftEncoderPositionMultiplier);
         rightEncoderPos = (rightEncoderMotor.getCurrentPosition() * rightEncoderPositionMultiplier);
+        centerEncoderPos = (centerEncoderMotor.getCurrentPosition() * centerEncoderPositionMultiplier);
 
-        deltaLeftDistance = leftEncoderPos - lastLeftEncoderPos;
-        deltaRightDistance = rightEncoderPos - lastRightEncoderPos;
+
+        deltaLeftPos = leftEncoderPos - lastLeftEncoderPos;
+        deltaRightPos = rightEncoderPos - lastRightEncoderPos;
+        deltaCenterPos = centerEncoderPos - lastCenterEncoderPos;
 
         //Calculate Angle
-        changeInRobotOrientation = (deltaLeftDistance - deltaRightDistance) / (robotEncoderWheelDistanceInTicks);
-        robotOrientationRadians = ((robotOrientationRadians + changeInRobotOrientation));
+        changeInRobotAngle = (deltaLeftPos - deltaRightPos) / (robotEncoderWheelDistanceInTicks);
+
+        robotAngleInRadians = (robotAngleInRadians + changeInRobotAngle);
 
         //Get the components of the motion
-        centerEncoderPos = (centerEncoderMotor.getCurrentPosition()*centerEncoderPositionMultiplier);
-        deltaCenterDistance = centerEncoderPos - lastCenterEncoderPos;
-        double horizontalChange = deltaCenterDistance - (changeInRobotOrientation*horizontalTicksPerRadian);
 
-        double p = ((deltaRightDistance + deltaLeftDistance) / 2);
+        double horizontalChange = deltaCenterPos - (changeInRobotAngle * horizontalTicksPerRadian);
+
+        double p = ((deltaRightPos + deltaLeftPos) / 2);
         double n = horizontalChange;
 
         //Calculate and update the position values
-        x = x + (p*Math.sin(robotOrientationRadians) + n*Math.cos(robotOrientationRadians));
-        y = y + (p*Math.cos(robotOrientationRadians) - n*Math.sin(robotOrientationRadians));
+        x = x + (p*Math.sin(robotAngleInRadians) + n*Math.cos(robotAngleInRadians));
+        y = y + (p*Math.cos(robotAngleInRadians) - n*Math.sin(robotAngleInRadians));
+
 
         lastLeftEncoderPos = leftEncoderPos;
         lastRightEncoderPos = rightEncoderPos;
         lastCenterEncoderPos = centerEncoderPos;
-    }
 
+    }
 
 
 
@@ -128,8 +133,14 @@ public class OdometryCoordinatePosition implements Runnable {
      * Returns the robot's global orientation
      * @return global orientation, in degrees
      */
-    public double returnOrientation(){ return Math.toDegrees(robotOrientationRadians) % 360; }
+    public double returnAngleDegree(){ return Math.toDegrees(robotAngleInRadians); }
 
+
+    /**
+     * Returns the robot's global orientation
+     * @return global orientation, in degrees
+     */
+    public double returnAngleRadian(){ return robotAngleInRadians; }
     /**
      * Stops the position update thread
      */
