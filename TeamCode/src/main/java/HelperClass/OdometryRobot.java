@@ -28,8 +28,6 @@ import org.firstinspires.ftc.robotcore.external.navigation.Orientation;
 
 import java.util.concurrent.TimeUnit;
 
-
-
 public class OdometryRobot {
 
     /* Rev Expansion IMU Sensors */
@@ -58,12 +56,12 @@ public class OdometryRobot {
     // Deadwheel Diamater of 2 Inch
     // Hence Count_per_inch = 8192 / ( 2* Pi * radius )
 
-    public static final double oneRotationTicks = 8192;
-    public static final double countsPerInch = 1304.45;
+    public static final double oneRotationTicks = Constants.ODOMETRY_TICKS_PER_REV;
+    public static final double countsPerInch = Constants.ODOMETRY_COUNTS_PER_INCH;
+    public static final double wheelRadius = Constants.ODOMETRY_WHEEL_RADIUS;
+    public static final double wheelDistanceApart = Constants.ODOMETRY_WHEEL_DISTANCE_INCH; // distance between left and right - in INCH
+    public static final double horizontalTicksPerRadian = Constants.HORIZONTAL_TICKS_PER_RAD;
 
-    public static final double wheelRadius = 1.0; // In INCH
-    public static final double wheelDistanceApart = 15.2; // distance between left and right - in INCH
-    public static final double horizontalTicksPerRadian = -134;
 
     private int leftEncoderPos = 0;
     private int centerEncoderPos = 0;
@@ -216,76 +214,80 @@ public class OdometryRobot {
 
     }
 
+    public void autoInit() {
+        FLMotor.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
+        FRMotor.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
+        BLMotor.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
+        BRMotor.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
+        //turnPid.setKp(1.8);
+        //turnPid.setKi(0.0);
+        //turnPid.setKd(1.8);
+    }
 
-    public void resetTicks() {
-        resetLeftTicks();
-        resetCenterTicks();
-        resetRightTicks();
+    public void move(double forward, double turn) {
+        FLMotor.setPower(forward - turn);
+        FRMotor.setPower(forward + turn);
+        BLMotor.setPower(forward - turn);
+        BRMotor.setPower(forward + turn);
     }
-    public void resetLeftTicks() {
-        leftEncoderPos = leftEncoderMotor.getCurrentPosition();
+
+    public void setPowers(double fl, double fr, double bl, double br) {
+       FLMotor.setPower(fl);
+       FRMotor.setPower(fr);
+       BLMotor.setPower(bl);
+       BRMotor.setPower(br);
     }
-    public int getLeftTicks() {
-        return leftEncoderMotor.getCurrentPosition() - leftEncoderPos;
+
+    public void setPowers(double[] powers) {
+        setPowers(powers[0], powers[1], powers[2], powers[3]);
     }
-    public void resetRightTicks() {
-        rightEncoderPos = rightEncoderMotor.getCurrentPosition();
+
+    public void setDrivetrainMode(DcMotor.RunMode runMode) {
+        FLMotor.setMode(runMode);
+        FRMotor.setMode(runMode);
+        BLMotor.setMode(runMode);
+        BRMotor.setMode(runMode);
     }
-    public int getRightTicks() {
-        return rightEncoderMotor.getCurrentPosition() - rightEncoderPos;
+    public void robotStop() {
+        // Set powers to 0
+        move(0, 0);
     }
-    public void resetCenterTicks() {
-        centerEncoderPos = centerEncoderMotor.getCurrentPosition();
+
+    public void robotRun(double forward, double turn) {
+        setPowers(forward - turn, forward + turn, forward - turn, forward + turn);
     }
-    public int getCenterTicks() {
-        return centerEncoderMotor.getCurrentPosition() - centerEncoderPos;
+
+    public void fieldCentricMove(double x, double y, double turn) {
+
+        x *= -1.0;
+        double power = Math.hypot(x, y);
+        double theta = Math.atan2(y, x) - imuAngleInRad(); // This should be replaced with Odometer angle
+
+        double rx = (Math.sin(theta + (Math.PI / 4))) * power;
+        double lx = (Math.sin(theta - (Math.PI / 4))) * power;
+
+        double fl = lx - turn;
+        double fr = rx + turn;
+        double bl = rx - turn;
+        double br = lx + turn;
+
+        setPowers(fl, fr, bl, br);
+
     }
-    public void drive(double fl, double bl, double fr, double br) {
-        FLMotor.setPower(fl);
-        BLMotor.setPower(bl);
-        FRMotor.setPower(fr);
-        BRMotor.setPower(br);
-    }
-    public void updatePosition() {
-        deltaLeftDistance = (getLeftTicks() / oneRotationTicks) * 2.0 * Math.PI * wheelRadius;
-        deltaRightDistance = (getRightTicks() / oneRotationTicks) * 2.0 * Math.PI * wheelRadius;
-        deltaCenterDistance = (getCenterTicks() / oneRotationTicks) * 2.0 * Math.PI * wheelRadius;
-        x  += (((deltaLeftDistance + deltaRightDistance) / 2.0)) * Math.cos(theta);
-        y  += (((deltaLeftDistance + deltaRightDistance) / 2.0)) * Math.sin(theta);
-        theta  += (deltaLeftDistance - deltaRightDistance) / wheelDistanceApart;
-        //resetTicks();
-    }
-    public double getX() {
-        return x;
-    }
-    public double getY() {
-        return y;
-    }
-    public double getTheta() {
-        return theta;
-    }
-    public void setX(double _x) {
-        x = _x;
-    }
-    public void setY(double _y) {
-        y = _y;
-    }
-    public void setTheta(double _theta) {
-        theta = _theta;
-    }
-    public double angle() {
+
+    public double imuAngleInDeg() {
         angles = imu.getAngularOrientation(AxesReference.INTRINSIC, AxesOrder.ZYX, AngleUnit.DEGREES);
         return AngleUnit.DEGREES.fromUnit(angles.angleUnit, angles.firstAngle);
     }
 
-    public float getRobotAngle() {
+    public float imuRobotAngle() {
         angles = imu.getAngularOrientation(AxesReference.INTRINSIC, AxesOrder.ZYX, AngleUnit.DEGREES);
         if (angles.firstAngle < 0) angles.firstAngle = angles.firstAngle * (-1.0f);
         else angles.firstAngle = -angles.firstAngle + 360.0f;
         return (angles.firstAngle);
     }
 
-    public float getRobotAngleRad() {
+    public float imuAngleInRad() {
         angles = imu.getAngularOrientation(AxesReference.INTRINSIC, AxesOrder.ZYX, AngleUnit.RADIANS);
         return (angles.firstAngle);
     }
