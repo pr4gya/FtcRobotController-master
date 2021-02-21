@@ -15,7 +15,7 @@ import com.qualcomm.robotcore.util.Range;
 import HelperClass.OdometryRobot;
 
 
-@TeleOp(name = "Odometry Positioning")
+@TeleOp(name = "Odometry Test")
 public class OdometerTest extends LinearOpMode {
     static final double threshold = 0.3;
     private ElapsedTime runtime = new ElapsedTime();
@@ -26,10 +26,11 @@ public class OdometerTest extends LinearOpMode {
     double distanceToTargetX = 0;
     double distanceToTargetY = 0;
     double distance = 0;
-    double targetX = 0;
-    double targetY = 24;
+    double targetX = 24;
+    double targetY = 0;
     int gotoTarget = 1;
     boolean move_fwd = false;
+    boolean move_side = false;
 
 
     OdometryRobot robot = new OdometryRobot();
@@ -46,9 +47,6 @@ public class OdometerTest extends LinearOpMode {
         telemetry.addData("status", "initialized");
         telemetry.update();
 
-        waitForStart();
-
-
         //Create and start GlobalCoordinatePosition thread to constantly update the global coordinate positions
         OdometryCoordinatePosition globalPositionUpdate = new OdometryCoordinatePosition(robot.leftEncoderMotor, robot.rightEncoderMotor, robot.centerEncoderMotor);
         Thread positionThread = new Thread(globalPositionUpdate);
@@ -61,12 +59,13 @@ public class OdometerTest extends LinearOpMode {
 
         //globalPositionUpdate.reverseCenterEncoder();
 
+        distanceToTargetX = targetX * robot.countsPerInch - globalPositionUpdate.returnXCoordinate();
+        distanceToTargetY = targetY * robot.countsPerInch - globalPositionUpdate.returnYCoordinate();
+        distance = Math.hypot(distanceToTargetX, distanceToTargetY);
 
-         distanceToTargetX = targetX * robot.countsPerInch - globalPositionUpdate.returnXCoordinate();
-         distanceToTargetY = targetY * robot.countsPerInch - globalPositionUpdate.returnYCoordinate();
-         distance = Math.hypot(distanceToTargetX, distanceToTargetY);
+        waitForStart();
 
-         while (!isStopRequested() && opModeIsActive()) {
+        while (!isStopRequested() && opModeIsActive()) {
 
             double move_y_axis = -gamepad1.left_stick_y;      // Remember, this is reversed!
             double move_x_axis = gamepad1.left_stick_x * 1.5; // Counteract imperfect strafing
@@ -84,19 +83,21 @@ public class OdometerTest extends LinearOpMode {
             robot.FRMotor.setPower(fr_power);
             robot.BRMotor.setPower(br_power);
 
-            if (gamepad1.right_trigger > 0 ) {
+            if (gamepad1.right_trigger > 0) {
+                telemetry.addData("RIGHT TRIGGER!!!!!!!!!! FORWARD", gamepad1.right_trigger);
                 move_fwd = true;
+                targetY = 24;
 
             }
 
-            if (distanceToTargetY >= 0 && move_fwd == true ) {
+            if (distanceToTargetY > 0 && move_fwd == true ) {
                 gotoTarget = 0;
                 double robotMovementAngle = Math.toDegrees(Math.atan2(distanceToTargetX, distanceToTargetY));
                 //double[] wheelPwr = rawSlide(0.0, 0.2, 0.0, 1.0);
-                robot.FLMotor.setPower(0.3);
-                robot.BLMotor.setPower(0.3);
-                robot.FRMotor.setPower(0.3);
-                robot.BRMotor.setPower(0.3);
+                robot.FLMotor.setPower(0.6);
+                robot.BLMotor.setPower(0.6);
+                robot.FRMotor.setPower(0.6);
+                robot.BRMotor.setPower(0.6);
 
                 distanceToTargetX = targetX * robot.countsPerInch - globalPositionUpdate.returnXCoordinate();
                 distanceToTargetY = targetY * robot.countsPerInch - globalPositionUpdate.returnYCoordinate();
@@ -104,12 +105,34 @@ public class OdometerTest extends LinearOpMode {
             }
 
 
+            if (gamepad1.left_trigger > 0 ) {
+                telemetry.addData("LEFT TRIGGER!!!!!!!!!! STRAFE", gamepad1.left_trigger);
+                move_side = true;
+                targetX = 12;
+
+            }
+
+            while (distanceToTargetX > 0 && move_side == true ) {
+//                gotoTarget = 0;
+                double robotMovementAngle = Math.toDegrees(Math.atan2(distanceToTargetX, distanceToTargetY));
+                //double[] wheelPwr = rawSlide(0.0, 0.2, 0.0, 1.0);
+                robot.FLMotor.setPower(0.4);
+                robot.BLMotor.setPower(-0.4);
+                robot.FRMotor.setPower(-0.4);
+                robot.BRMotor.setPower(0.4);
+
+                distanceToTargetX = targetX * robot.countsPerInch - globalPositionUpdate.returnXCoordinate();
+                distanceToTargetY = targetY * robot.countsPerInch - globalPositionUpdate.returnYCoordinate();
+                distance = Math.hypot(distanceToTargetX, distanceToTargetY);
+            }
+
+
+
             /*
             telemetry.addData("Left ticks", robot.getLeftTicks());
             telemetry.addData("Right ticks", robot.getRightTicks());
             telemetry.addData("Left distance", (robot.getLeftTicks() / robot.oneRotationTicks) * 2.0 * Math.PI * robot.wheelRadius);
             telemetry.addData("Right distance", (robot.getRightTicks() / robot.oneRotationTicks) * 2.0 * Math.PI * robot.wheelRadius);
-
             telemetry.addData("Center ticks", robot.getCenterTicks());
             telemetry.addData("X value", robot.getX());
             telemetry.addData("Y value", robot.getY());

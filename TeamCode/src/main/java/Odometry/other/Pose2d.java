@@ -1,4 +1,4 @@
-package Odometry.geometry;
+package Odometry.other;
 /**
  * A two-dimensional position that includes a {@link Vector2d} and
  * a heading angle. Look at {@link Vector2d} for information on what

@@ -1,4 +1,4 @@
-package OdometryResources;
+package Odometry.other;
 
 
 import com.qualcomm.hardware.bosch.BNO055IMU;

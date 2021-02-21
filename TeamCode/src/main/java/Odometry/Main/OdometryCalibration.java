@@ -63,7 +63,7 @@ public class OdometryCalibration extends LinearOpMode {
         telemetry.addData("Center Encoder Position", robot.centerEncoderMotor.getCurrentPosition());
         telemetry.addData("Odometry System Calibration Status", "Init Complete");
         telemetry.update();
-        robot.resetTicks();
+        //robot.resetTicks();
 
         waitForStart();
 

@@ -8,6 +8,7 @@ import com.qualcomm.robotcore.util.ElapsedTime;
 import android.os.SystemClock;
 
 import HelperClass.OdometryRobot;
+import HelperClass.Robot;
 import HelperClass.RobotVision;
 
 import com.qualcomm.robotcore.hardware.DcMotor;
@@ -20,7 +21,9 @@ public class VortexOdometryAuto extends LinearOpMode {
     //calls helper classes
     public RobotVision rVision;
     // public Robot robot;
-    OdometryRobot robot = new OdometryRobot();
+    OdometryRobot odoRobot = new OdometryRobot();
+    Robot robot = new Robot();
+
 
     //ring count vars
     public String ringCountOnField = null;
@@ -85,11 +88,11 @@ public class VortexOdometryAuto extends LinearOpMode {
 
             switch (step) {
                 case confirmation:
-                        // Check to confirm that ring has been detected
+                        // confirm ring detection
                     break;
 
                 case startMv:
-                    // Goto Position A on the filed to deliver wobble goal
+                    //
 
 
                 case none:
