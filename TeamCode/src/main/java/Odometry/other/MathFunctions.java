@@ -1,4 +1,4 @@
-package OdometryResources;
+package Odometry.other;
 
 public class MathFunctions {
     /**

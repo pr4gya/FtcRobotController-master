@@ -183,26 +183,26 @@ public class OdometryRobot {
         parameters.loggingTag           = "IMU";
         imu                             = hwMap.get(BNO055IMU.class, "imu");
 
-        // Since our Rev Expansion is in Vertical Position, so we need to Z & X
+        // need z & x because rev expansion hub is mounted vertically
 
-        //Need to be in CONFIG mode to write to registers
+        //must be in config mode to write to registers
         imu.write8(BNO055IMU.Register.OPR_MODE,BNO055IMU.SensorMode.CONFIG.bVal & 0x0F);
         byte AXIS_MAP_CONFIG_BYTE = 0x6; //This is what to write to the AXIS_MAP_CONFIG register to swap x and z axes
         byte AXIS_MAP_SIGN_BYTE = 0x1; //This is what to write to the AXIS_MAP_SIGN register to negate the z axis
         //Need to be in CONFIG mode to write to registers
         imu.write8(BNO055IMU.Register.OPR_MODE,BNO055IMU.SensorMode.CONFIG.bVal & 0x0F);
-        TimeUnit.MILLISECONDS.sleep(100); //Changing modes requires a delay before doing anything else
+        TimeUnit.MILLISECONDS.sleep(100); //changing modes require a delay before doing anything else
 
-        //Write to the AXIS_MAP_CONFIG register
+        //write to the AXIS_MAP_CONFIG register
         imu.write8(BNO055IMU.Register.AXIS_MAP_CONFIG,AXIS_MAP_CONFIG_BYTE & 0x0F);
 
-        //Write to the AXIS_MAP_SIGN register
+        //write to the AXIS_MAP_SIGN register
         imu.write8(BNO055IMU.Register.AXIS_MAP_SIGN,AXIS_MAP_SIGN_BYTE & 0x0F);
 
-        //Need to change back into the IMU mode to use the gyro
+        //change back into the IMU mode to use the gyro
         imu.write8(BNO055IMU.Register.OPR_MODE,BNO055IMU.SensorMode.IMU.bVal & 0x0F);
 
-        TimeUnit.MILLISECONDS.sleep(100); //Changing modes again requires a delay
+        TimeUnit.MILLISECONDS.sleep(100); //again, requires a delay
 
         imu.initialize(parameters);
 
@@ -213,7 +213,7 @@ public class OdometryRobot {
     public void RobotOdometer() {
 
     }
-
+//autoInit() initializes the robot
     public void autoInit() {
         FLMotor.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
         FRMotor.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
@@ -224,6 +224,7 @@ public class OdometryRobot {
         //turnPid.setKd(1.8);
     }
 
+    //in move() we pass 2 variables, forward and turn
     public void move(double forward, double turn) {
         FLMotor.setPower(forward - turn);
         FRMotor.setPower(forward + turn);
@@ -238,18 +239,21 @@ public class OdometryRobot {
        BRMotor.setPower(br);
     }
 
+//
     public void setPowers(double[] powers) {
         setPowers(powers[0], powers[1], powers[2], powers[3]);
     }
 
+    //
     public void setDrivetrainMode(DcMotor.RunMode runMode) {
         FLMotor.setMode(runMode);
         FRMotor.setMode(runMode);
         BLMotor.setMode(runMode);
         BRMotor.setMode(runMode);
     }
+
     public void robotStop() {
-        // Set powers to 0
+        // set powers to 0
         move(0, 0);
     }
 
@@ -257,11 +261,13 @@ public class OdometryRobot {
         setPowers(forward - turn, forward + turn, forward - turn, forward + turn);
     }
 
+
+    //fieldcentric movement
     public void fieldCentricMove(double x, double y, double turn) {
 
         x *= -1.0;
         double power = Math.hypot(x, y);
-        double theta = Math.atan2(y, x) - imuAngleInRad(); // This should be replaced with Odometer angle
+        double theta = Math.atan2(y, x) - imuAngleInRad(); // this should be replaced with odometer angle
 
         double rx = (Math.sin(theta + (Math.PI / 4))) * power;
         double lx = (Math.sin(theta - (Math.PI / 4))) * power;
@@ -275,6 +281,7 @@ public class OdometryRobot {
 
     }
 
+    //imu angle in degrees
     public double imuAngleInDeg() {
         angles = imu.getAngularOrientation(AxesReference.INTRINSIC, AxesOrder.ZYX, AngleUnit.DEGREES);
         return AngleUnit.DEGREES.fromUnit(angles.angleUnit, angles.firstAngle);
@@ -287,6 +294,7 @@ public class OdometryRobot {
         return (angles.firstAngle);
     }
 
+    //imu angle in radians
     public float imuAngleInRad() {
         angles = imu.getAngularOrientation(AxesReference.INTRINSIC, AxesOrder.ZYX, AngleUnit.RADIANS);
         return (angles.firstAngle);

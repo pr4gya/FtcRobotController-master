@@ -1,4 +1,4 @@
-package Odometry;
+package Odometry.other;
 
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
@@ -6,8 +6,6 @@ import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 import Hardware.DriveTrainNew;
 
 import com.qualcomm.robotcore.util.ElapsedTime;
-import HelperClass.Robot;
-import OdometryResources.OdoRobot;
 
 @TeleOp(name="Odometry TeleOp", group="Pushbot")
 public class OdoTeleOp extends LinearOpMode {

@@ -32,7 +32,7 @@ import org.firstinspires.ftc.teamcode.Vortex14969RedAutonomous;
 
 public class Robot {
 
-    /* Public OpMode members. */
+    /* public opmode members. */
 
     public DcMotor FLMotor = null;
     public DcMotor FRMotor = null;
@@ -126,7 +126,7 @@ public class Robot {
         claw = hwMap.get(Servo.class, "claw");
 
 
-        // Initailizing Rev 2M Distance sensor
+        // init rev 2m dist sensor
         // I2C Port - 2 Front Range Sensor connected
         frontRange = hwMap.get(DistanceSensor.class, "range_front");
         // I2C Port - 1 Red Wall Range Sensor connected
@@ -173,8 +173,8 @@ public class Robot {
 //        FRMotor.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
 //        BRMotor.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
 //
-//        shooting1.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
-//        shooting2.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+        shooting1.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+        shooting2.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
 //
 //        arm.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
 
@@ -183,8 +183,8 @@ public class Robot {
 //        FRMotor.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
 //        BRMotor.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
 //        arm.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
-//        shooting1.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
-//        shooting2.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
+        shooting1.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
+        shooting2.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
 
         FLMotor.setZeroPowerBehavior(DcMotorEx.ZeroPowerBehavior.BRAKE);
         BLMotor.setZeroPowerBehavior(DcMotorEx.ZeroPowerBehavior.BRAKE);
@@ -209,26 +209,26 @@ public class Robot {
         parameters.loggingTag           = "IMU";
         imu                             = hwMap.get(BNO055IMU.class, "imu");
 
-        // Since our Rev Expansion is in Vertical Position, so we need to Z & X
+        // need z & x because rev expansion hub is mounted vertically
 
-        //Need to be in CONFIG mode to write to registers
+        //must be in config mode to write to registers
         imu.write8(BNO055IMU.Register.OPR_MODE,BNO055IMU.SensorMode.CONFIG.bVal & 0x0F);
         byte AXIS_MAP_CONFIG_BYTE = 0x6; //This is what to write to the AXIS_MAP_CONFIG register to swap x and z axes
         byte AXIS_MAP_SIGN_BYTE = 0x1; //This is what to write to the AXIS_MAP_SIGN register to negate the z axis
         //Need to be in CONFIG mode to write to registers
         imu.write8(BNO055IMU.Register.OPR_MODE,BNO055IMU.SensorMode.CONFIG.bVal & 0x0F);
-        TimeUnit.MILLISECONDS.sleep(100); //Changing modes requires a delay before doing anything else
+        TimeUnit.MILLISECONDS.sleep(100); //changing modes require a delay before doing anything else
 
-        //Write to the AXIS_MAP_CONFIG register
+        //write to the AXIS_MAP_CONFIG register
         imu.write8(BNO055IMU.Register.AXIS_MAP_CONFIG,AXIS_MAP_CONFIG_BYTE & 0x0F);
 
-        //Write to the AXIS_MAP_SIGN register
+        //write to the AXIS_MAP_SIGN register
         imu.write8(BNO055IMU.Register.AXIS_MAP_SIGN,AXIS_MAP_SIGN_BYTE & 0x0F);
 
-        //Need to change back into the IMU mode to use the gyro
+        //change back into the IMU mode to use the gyro
         imu.write8(BNO055IMU.Register.OPR_MODE,BNO055IMU.SensorMode.IMU.bVal & 0x0F);
 
-        TimeUnit.MILLISECONDS.sleep(100); //Changing modes again requires a delay
+        TimeUnit.MILLISECONDS.sleep(100); //again, requires a delay
 
         imu.initialize(parameters);
 
@@ -237,7 +237,7 @@ public class Robot {
 
     public void setupStartPosition () throws InterruptedException {
 
-        // TODO: Lift wobbleGoal , Shoot, Intake motors to be setup here
+        // TODO: lift, wobble goal, shoot, intake motor setup
 
         BNO055IMU.Parameters parameters = new BNO055IMU.Parameters();
         parameters.angleUnit            = BNO055IMU.AngleUnit.DEGREES;
