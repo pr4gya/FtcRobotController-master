@@ -29,7 +29,6 @@ import org.firstinspires.ftc.robotcore.external.navigation.Orientation;
 
 import org.firstinspires.ftc.teamcode.Vortex14969RedAutonomous;
 
-
 public class Robot {
 
     /* public opmode members. */
@@ -81,9 +80,10 @@ public class Robot {
     public Acceleration gravity;
     public static double startingAngle=0;
     private float angleLast;
-    public DistanceSensor frontRange;
-    public DistanceSensor redWallRange;
+//    public DistanceSensor frontRange;
+//    public DistanceSensor redWallRange;
 
+    int autonomousStep;
 
     public enum AutoStep {
         strafeStart, strafeStop, fwdMv, fwdMvStop, wbleMv, wbleMvStop, shootCont, end,
@@ -91,6 +91,8 @@ public class Robot {
         alignToShootRangeStart, alignToShootRangeStop, readyToShoot, shootStart, shootEnd, takePowerShoot, teleopAlign, park, teleopAlignStop
 
     }
+
+    double offset;
 
     public AutoStep autostep = AutoStep.end;
 
@@ -128,9 +130,9 @@ public class Robot {
 
         // init rev 2m dist sensor
         // I2C Port - 2 Front Range Sensor connected
-        frontRange = hwMap.get(DistanceSensor.class, "range_front");
+//        frontRange = hwMap.get(DistanceSensor.class, "range_front");
         // I2C Port - 1 Red Wall Range Sensor connected
-        redWallRange = hwMap.get(DistanceSensor.class, "range_red_wall");
+//        redWallRange = hwMap.get(DistanceSensor.class, "range_red_wall");
 
 
         //FLMotor = hwMap.get(DcMotor.class, "FLMotor");
@@ -520,6 +522,8 @@ public class Robot {
                 autostep = AutoStep.launchlinestart;
                 break;
 
+            case shootCont:
+                break;
             case end:
                 break;
 
@@ -692,6 +696,8 @@ public class Robot {
                 autostep=AutoStep.park;
                 break;
 
+            case teleopAlign:
+                break;
             case park:
                 FLMotor.setPower(0.5);
                 BLMotor.setPower(0.5);
@@ -706,9 +712,15 @@ public class Robot {
                 break;
 
 
+
+
+
+
         }
     }
+
 }
+
 
 
 

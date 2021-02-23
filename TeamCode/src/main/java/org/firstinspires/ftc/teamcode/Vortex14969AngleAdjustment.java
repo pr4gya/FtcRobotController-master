@@ -30,6 +30,7 @@ public class Vortex14969AngleAdjustment extends LinearOpMode {
     float angleOne;
     float angleTwo;
 
+
     Robot robot = new Robot();
     private ElapsedTime runtime = new ElapsedTime();
     private double currentTime = runtime.seconds();
@@ -56,11 +57,11 @@ public class Vortex14969AngleAdjustment extends LinearOpMode {
             //robot.claw.setPosition(-1);
             angleOne = robot.getRobotAngle();
             telemetry.addData("Robot Angle", "%.1f", angleOne);
-            telemetry.addData("currentTime", "%s", currentTime);
-            telemetry.addData("Front range", String.format("%.01f in", robot.frontRange.getDistance(DistanceUnit.CM)));
-            telemetry.addData("Red Wall range", String.format("%.01f in", robot.redWallRange.getDistance(DistanceUnit.CM)));
-
-            telemetry.addData("Sensor Device Name", String.format("%s", robot.redWallRange.getDeviceName()));
+//            telemetry.addData("currentTime", "%s", currentTime);
+//            telemetry.addData("Front range", String.format("%.01f in", robot.frontRange.getDistance(DistanceUnit.CM)));
+//            telemetry.addData("Red Wall range", String.format("%.01f in", robot.redWallRange.getDistance(DistanceUnit.CM)));
+//
+//            telemetry.addData("Sensor Device Name", String.format("%s", robot.redWallRange.getDeviceName()));
             telemetry.update();
 
         }
@@ -78,6 +79,7 @@ public class Vortex14969AngleAdjustment extends LinearOpMode {
         autonomousStep=400;
 
         while (opModeIsActive()) {
+
 
             switch (autonomousStep) {
                 case 400:
@@ -190,10 +192,10 @@ public class Vortex14969AngleAdjustment extends LinearOpMode {
                     break;
 
             }
-
-            front_distance = robot.frontRange.getDistance(DistanceUnit.INCH);
-
-            red_side_wall_distance = robot.redWallRange.getDistance(DistanceUnit.INCH);
+//
+//            front_distance = robot.frontRange.getDistance(DistanceUnit.INCH);
+//
+//            red_side_wall_distance = robot.redWallRange.getDistance(DistanceUnit.INCH);
 
             //robot.moveUpdate();
             telemetry.addData("OpModeActive", "Running");
