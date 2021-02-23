@@ -23,6 +23,8 @@ public class Vortex14969Teleop extends LinearOpMode {
     final double CLAW_SPEED = 0.01;
     double front_distance;
     double red_side_wall_distance;
+    double shootPower = 0;
+    public double angleOne;
 
     float offset;
     @Override
@@ -44,7 +46,10 @@ public class Vortex14969Teleop extends LinearOpMode {
 
             telemetry.addData("curr pos", "%s",robot.arm.getCurrentPosition());
             telemetry.addData("correct", "%s", correct);
+            angleOne = robot.getRobotAngle();
+            telemetry.addData("Robot Angle", "%.1f", angleOne);
             telemetry.update();
+
         }
 
         while (opModeIsActive()) {
@@ -65,7 +70,6 @@ public class Vortex14969Teleop extends LinearOpMode {
             double bl_power = move_y_axis - move_x_axis + pivot_turn;
             double fr_power = move_y_axis - move_x_axis - pivot_turn;
             double br_power = move_y_axis + move_x_axis - pivot_turn;
-            double shootPower = 0.6;
 
             //now we can set the powers
             robot.FLMotor.setPower(fl_power);
@@ -89,9 +93,6 @@ public class Vortex14969Teleop extends LinearOpMode {
                 robot.intake.setPower(0);
             }
 
-            //when button pressed, shooting motors are turned on
-            boolean ifShoot = gamepad2.right_bumper;
-            //power of the shooting motors can be controlled using dpad right and left
 
 //            if (gamepad1.a) {
 //                clawPosition += CLAW_SPEED;
@@ -110,12 +111,10 @@ public class Vortex14969Teleop extends LinearOpMode {
             }
 
             if (gamepad2.a) {
-                robot.arm.setTargetPosition(1);
                 robot.arm.setPower(1);
             }
             else if (gamepad2.b){
-                robot.arm.setTargetPosition(-1);
-                robot.arm.setPower(-0.85);
+                robot.arm.setPower(-1);
             }
             else{
                 robot.arm.setTargetPosition(0);
@@ -123,25 +122,30 @@ public class Vortex14969Teleop extends LinearOpMode {
                 robot.arm.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
             }
 
-            if (ifShoot) {
-                shootPower = -0.6;
+
+
+            //when button pressed, shooting motors are turned on
+            boolean ifShoot = gamepad2.right_bumper;
+            //power of the shooting motors can be controlled using dpad right and left
+
+            if (gamepad2.dpad_down){
+                shootPower = -0.47;
+            }
+
+            if (gamepad2.dpad_up) {
+                shootPower = -0.52;
+            }
+
+            if (ifShoot){
                 robot.shooting1.setPower(shootPower);
                 robot.shooting2.setPower(shootPower);
             }
-
-
             if (ifShoot == false) {
                 robot.shooting1.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
                 robot.shooting2.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
                 robot.shooting1.setPower(0);
                 robot.shooting2.setPower(0);
             }
-
-
-//            if(gamepad1.b){
-//                robot.adjustAngle();
-//            }
-
 
             boolean intakeHolder = gamepad2.x;
             if (gamepad2.x) {
@@ -154,17 +158,19 @@ public class Vortex14969Teleop extends LinearOpMode {
             if (gamepad2.y) {
                 robot.ringPush.setPosition(-1);
             } else {
-                robot.ringPush.setPosition(0.3);
+                robot.ringPush.setPosition(1);
             }
+
+
 
 
 
             //robot.intakeHolder.setDirection(2);
             // End of Code for Motor Movement
-
-            front_distance = robot.frontRange.getDistance(DistanceUnit.INCH);
-
-            red_side_wall_distance = robot.redWallRange.getDistance(DistanceUnit.INCH);
+//
+//            front_distance = robot.frontRange.getDistance(DistanceUnit.INCH);
+//
+//            red_side_wall_distance = robot.redWallRange.getDistance(DistanceUnit.INCH);
 
 
             telemetry.addData("Claw Pos: ", "%f", clawPosition);

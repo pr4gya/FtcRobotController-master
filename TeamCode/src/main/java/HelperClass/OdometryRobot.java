@@ -89,7 +89,7 @@ public class OdometryRobot {
     public final static double CLAW_HOME = 0.0;
     public final static double CLAW_MAX = 1.0;
 
-
+    boolean tRight;
     public DcMotor leftEncoderMotor = null;
     public DcMotor rightEncoderMotor = null;
     public DcMotor centerEncoderMotor = null;
@@ -260,6 +260,31 @@ public class OdometryRobot {
     public void robotRun(double forward, double turn) {
         setPowers(forward - turn, forward + turn, forward - turn, forward + turn);
     }
+    public void robotTurn(boolean tRight, double tAngle, double dAngle, double fwdpwr){
+        float angleOne = getRobotAngle();
+        dAngle = 200;
+
+        if(dAngle>angleOne){
+            tRight = true;
+        }
+        else{
+            tRight = false;
+        }
+        while (!tRight && dAngle != angleOne ){
+            angleOne = getRobotAngle();
+            FLMotor.setPower(-fwdpwr);
+            BLMotor.setPower(fwdpwr);
+            FRMotor.setPower(-fwdpwr);
+            BRMotor.setPower(fwdpwr);
+        }
+        while (tRight && dAngle != angleOne ){
+            angleOne = getRobotAngle();
+            FLMotor.setPower(fwdpwr);
+            BLMotor.setPower(-fwdpwr);
+            FRMotor.setPower(fwdpwr);
+            BRMotor.setPower(-fwdpwr);
+        }
+    }
 
 
     //fieldcentric movement
@@ -293,6 +318,14 @@ public class OdometryRobot {
         else angles.firstAngle = -angles.firstAngle + 360.0f;
         return (angles.firstAngle);
     }
+
+    public float getRobotAngle() {
+        angles = imu.getAngularOrientation(AxesReference.INTRINSIC, AxesOrder.ZYX, AngleUnit.DEGREES);
+        if (angles.firstAngle < 0) angles.firstAngle = angles.firstAngle * (-1.0f);
+        else angles.firstAngle = -angles.firstAngle + 360.0f;
+        return (angles.firstAngle);
+    }
+
 
     //imu angle in radians
     public float imuAngleInRad() {
