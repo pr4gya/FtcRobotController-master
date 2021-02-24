@@ -31,6 +31,7 @@ public class VortexOdometryAuto extends LinearOpMode {
     int gotoTarget = 0;
     boolean move_fwd = false;
     boolean move_side = false;
+    boolean move_back = false;
 
     //turn vars
     boolean tRight;
@@ -46,11 +47,14 @@ public class VortexOdometryAuto extends LinearOpMode {
     public double fwdpwr = 0.7;
     double sidepwr = 0.6;
 
+    double xAxisDistInch;
+    double yAxisDistInch;
+
     //enum vars defined
     private enum Step {confirmation, startMv, turnL, turnR, checkRings, mvBack, mvForward, mvStrafe, dropWobble, shootRing,
         launchLine, quad, single, none, angleAdj, park, stop, robotTurn, robotStrafe
     }
-    private Step step = Step.mvForward;
+    private Step step = Step.mvBack;
     @Override
     public void runOpMode() throws InterruptedException {
         runtime.reset();
@@ -98,7 +102,7 @@ public class VortexOdometryAuto extends LinearOpMode {
 
         waitForStart();
 
-
+        step = Step.mvForward;
         while(opModeIsActive()) {
             runtime.reset();
             currentTime = runtime.seconds();
@@ -129,26 +133,34 @@ public class VortexOdometryAuto extends LinearOpMode {
                         odoRobot.FRMotor.setPower(-fwdpwr);
                         odoRobot.BRMotor.setPower(fwdpwr);
                     }
-                    step = Step.stop;
+                    step = Step.mvBack;
                     break;
 
                 case mvForward:
                     // Goto Position A on the filed to deliver wobble goal
                     move_fwd = true;
-                    targetX = 06;
+                    targetX = 00;
                     targetY = 36;
-                    distanceToTargetX = targetX * odoRobot.countsPerInch - globalPositionUpdate.returnXCoordinate();
-                    distanceToTargetY = targetY * odoRobot.countsPerInch - globalPositionUpdate.returnYCoordinate();
-                    distance = Math.hypot(distanceToTargetX, distanceToTargetY);
                     //gotoPosition(globalPositionUpdate, targetX, targetY, 0.3, 0.0, 1.0 );
 
-                    moveToPoint(globalPositionUpdate, targetX, targetY, 0.8, 0.0, 00.0);
-//                    if (distanceToTargetY < 0 ) {
-//                        step = Step.robotStrafe;
-//                    }
-                    step = Step.robotStrafe;
+                    moveToPoint(globalPositionUpdate, targetX, targetY, 0.4, 0.0, 00.0);
+                    if (yAxisDistInch>=targetY) {
+                        step = Step.mvBack;
+                    }
                     break;
 
+                case mvBack:
+                    // Goto Position A on the filed to deliver wobble goal
+                    move_fwd = true;
+                    targetX = 00;
+                    targetY = 64;
+                    //gotoPosition(globalPositionUpdate, targetX, targetY, 0.3, 0.0, 1.0 );
+
+                    moveToPoint(globalPositionUpdate, targetX, targetY, -0.4, 0.0, 00.0);
+                    if (yAxisDistInch>=targetY) {
+                        step = Step.mvBack;
+                    }
+                    break;
 
                 case robotStrafe:
                     while(step == Step.robotStrafe && distanceToTargetX<0 ) {
@@ -163,10 +175,6 @@ public class VortexOdometryAuto extends LinearOpMode {
 //                        odoRobot.robotTurn(tRight, dAngle, tAngle, fwdPwr);
 //                        break;
 //                    }
-//
-//
-//
-//
 //                    if (globalPositionUpdate.returnAngleDegree() < 0 ) {
 //                        step = Step.robotTurn;
 //                    }
@@ -179,26 +187,29 @@ public class VortexOdometryAuto extends LinearOpMode {
                     break;
                 //robot.moveUpdate();
             }
+//
 //            telemetry.addData("Distance ", distance / odoRobot.countsPerInch);
 //            telemetry.addData(" Time", "%s", currentTime);
-//            telemetry.addData("distanceToTargetX ", distanceToTargetX / odoRobot.countsPerInch);
-//            telemetry.addData("distanceToTargetY ", distanceToTargetY / odoRobot.countsPerInch);
-//            telemetry.addData("X Position", globalPositionUpdate.returnXCoordinate() / odoRobot.countsPerInch);
-//            telemetry.addData("Y Position", globalPositionUpdate.returnYCoordinate() / odoRobot.countsPerInch);
-//            telemetry.addData("Odometry Angle (Degree)", globalPositionUpdate.returnAngleDegree());
-//            telemetry.addData("IMU Robot Angle: ", "%f", odoRobot.imuRobotAngle());
+            telemetry.addData("y axis dist ", yAxisDistInch);
+            telemetry.addData("distanceToTargetX ", distanceToTargetX / odoRobot.countsPerInch);
+            telemetry.addData("distanceToTargetY ", distanceToTargetY / odoRobot.countsPerInch);
+            telemetry.addData("X Position", globalPositionUpdate.returnXCoordinate() / odoRobot.countsPerInch);
+            telemetry.addData("Y Position", globalPositionUpdate.returnYCoordinate() / odoRobot.countsPerInch);
+            telemetry.addData("Odometry Angle (Degree)", globalPositionUpdate.returnAngleDegree());
+            telemetry.addData("IMU Robot Angle: ", "%f", odoRobot.imuRobotAngle());
 //            telemetry.addData("Vertical left encoder position", odoRobot.leftEncoderMotor.getCurrentPosition());
 //            telemetry.addData("Vertical right encoder position", odoRobot.rightEncoderMotor.getCurrentPosition());
 //            telemetry.addData("horizontal encoder position", odoRobot.centerEncoderMotor.getCurrentPosition());
+               telemetry.addData("VortexStep", "%s", step);
+                //telemetry.addData("desired X", "%s", targetX);
+                //telemetry.addData("distance to desired X", "%s", distanceToTargetX);
+                //telemetry.addData("desired y", "%s", targetY);
+                //telemetry.addData("distance to desired y", "%s", distanceToTargetY);
+
+                telemetry.update();
 
         }
-        telemetry.addData("VortexStep", "%s", step);
-        //telemetry.addData("desired X", "%s", targetX);
-        //telemetry.addData("distance to desired X", "%s", distanceToTargetX);
-        //telemetry.addData("desired y", "%s", targetY);
-        //telemetry.addData("distance to desired y", "%s", distanceToTargetY);
 
-        telemetry.update();
 
         globalPositionUpdate.stop();
 
@@ -209,14 +220,19 @@ public class VortexOdometryAuto extends LinearOpMode {
         double fl, fr, bl, br;
         distanceToTargetX = targetX * robot.countsPerInch - ngpu.returnXCoordinate();
         distanceToTargetY = targetY * robot.countsPerInch - ngpu.returnYCoordinate();
+        xAxisDistInch = ngpu.returnXCoordinate()/odoRobot.countsPerInch;
+        yAxisDistInch = ngpu.returnYCoordinate()/odoRobot.countsPerInch;
 
-        while (distanceToTargetY > 0) {
+//        while (yAxisDistInch<targetY) {
+        while (yAxisDistInch<=0){
             distanceToTargetX = targetX * robot.countsPerInch - ngpu.returnXCoordinate();
             distanceToTargetY = targetY * robot.countsPerInch - ngpu.returnYCoordinate();
             double absoluteAngleToPoint = Math.atan2(distanceToTargetY, distanceToTargetX);
 
             double robotAngleToPoint = ngpu.returnAngleRadian();
             //double robotMovementAngle = Math.toDegrees(Math.atan2(distanceToTargetX, distanceToTargetY));
+            xAxisDistInch = ngpu.returnXCoordinate()/odoRobot.countsPerInch;
+            yAxisDistInch = ngpu.returnYCoordinate()/odoRobot.countsPerInch;
 
             //turnPID.run(0, robotAngleToPoint);
             //double anglePwr = turnPID.getOutput() * turnPwr;
