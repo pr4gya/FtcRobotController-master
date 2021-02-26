@@ -85,28 +85,7 @@ public class Teleop extends LinearOpMode {
                 robot.intake.setPower(0);
             }
 
-
-            if (gamepad2.dpad_down){
-                shootPower = -0.47;
-            }
-
-            //high goal shooting
-            if (gamepad2.dpad_up){
-                robot.shooting1.setPower(0.5);
-                robot.shooting2.setPower(0.5);
-                for (int i =1; i>=3; i++){
-                    SystemClock.sleep(2500);
-                    robot.ringPush.setPosition(-1);
-                    SystemClock.sleep(500);
-                    robot.ringPush.setPosition(1);
-                    SystemClock.sleep(500);
-                }
-                robot.shooting1.setPower(0);
-                robot.shooting2.setPower(0);
-            }
-
-
-            //servos:
+        //servos:
             if (gamepad2.x) { //intake holder
                 robot.intakeHolder.setPosition(1);
             } else {
@@ -123,6 +102,21 @@ public class Teleop extends LinearOpMode {
                 robot.claw.setPosition(-1);
             }
 
+        //autonomous optimizations
+            //high goal shooting
+            if (gamepad2.dpad_up){
+                robot.shooting1.setPower(0.5);
+                robot.shooting2.setPower(0.5);
+                for (int i =1; i>=3; i++){
+                    SystemClock.sleep(2500);
+                    robot.ringPush.setPosition(-1);
+                    SystemClock.sleep(500);
+                    robot.ringPush.setPosition(1);
+                    SystemClock.sleep(500);
+                }
+                robot.shooting1.setPower(0);
+                robot.shooting2.setPower(0);
+            }
 
 //            front_distance = robot.frontRange.getDistance(DistanceUnit.INCH);
 //            red_side_wall_distance = robot.redWallRange.getDistance(DistanceUnit.INCH);
@@ -132,7 +126,6 @@ public class Teleop extends LinearOpMode {
 //            telemetry.addData("Red Wall range", String.format("%.01f cm", red_side_wall_distance));
             telemetry.addData("Servo Position: ", "%f", robot.ringPush.getPosition());
             telemetry.update();
-
 
         }
         //end while(OpmodeIsActive);
