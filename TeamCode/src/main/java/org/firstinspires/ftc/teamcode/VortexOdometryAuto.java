@@ -21,8 +21,8 @@ import com.qualcomm.robotcore.util.Range;
 import HelperClass.Constants;
 import HelperClass.OdometryRobot;
 //import HelperClass.PID;
+import HelperClass.Robot;
 import HelperClass.RobotVision;
-//plz
 
 
 @Autonomous(name="OdometryAuto", group="Linear Opmode")
@@ -50,8 +50,13 @@ public class VortexOdometryAuto extends LinearOpMode {
     boolean move_side_right = false;
     boolean move_back = false;
     public double fwdpwr = 0.7;
+    double LeftDist = 0;
+    double fwdDist = 0;
+    double backDist = 0;
+    double rightDist = 0;
+    double fwdDist1 = 0;
+    double startXPos, startYPos;
 
-//    private PID turnPID = new PID(1.8, 0.1, 1, 2.0, 0.05, -0.3, 0.3);
 
     //enum vars defined
     private enum Step {
@@ -74,34 +79,32 @@ public class VortexOdometryAuto extends LinearOpMode {
     public void runOpMode() throws InterruptedException {
 
         odoRobot.init(hardwareMap);
+        rVision = new RobotVision();
+        rVision.initVuforia(hardwareMap);
+        rVision.initTfod(hardwareMap);
+        rVision.activateTFOD();
         runtime.reset();
-        telemetry.addData("status", "initialized");
-        telemetry.update();
 
         //Create and start GlobalCoordinatePosition thread to constantly update the global coordinate positions
+
         OdometryCoordinatePosition globalPositionUpdate = new OdometryCoordinatePosition(odoRobot.leftEncoderMotor, odoRobot.rightEncoderMotor, odoRobot.centerEncoderMotor);
         Thread positionThread = new Thread(globalPositionUpdate);
         positionThread.start();
 
         // ensure correct ring detection
         while (!opModeIsActive() && !isStopRequested()) {
-            // Now get the number of rings on the field
-//            rVision.updateRingCount();
-//            ringCountOnField = rVision.getRingCount();
-//            ringCountOnFieldLast = ringCountOnField;
-//
-//            int correct = robot.arm.getCurrentPosition();
-//            robot.arm.setPower(0);
-//            robot.arm.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
-//            robot.claw.setPosition(-1);
-//            robot.ringPush.setPosition(0);
-//
-//            telemetry.addData("RingCount", "%s", ringCountOnField);
-//            telemetry.addData("Robot Angle-Deg", "%.1f", robot.getRobotAngle());
-//            telemetry.addData("Robot Angle-Rad", "%.1f", robot.getRobotAngleRad());
-//            telemetry.addData("FLMotor-1", "%d ", robot.FLMotor.getCurrentPosition());
-//            telemetry.addData("arm position", "%s", correct);
-//            telemetry.update();
+            rVision.updateRingCount();
+            ringCountOnField = rVision.getRingCount();
+            ringCountOnFieldLast = ringCountOnField;
+            odoRobot.claw.setPosition(1);
+            telemetry.addData("RingCount", ringCountOnField);
+            telemetry.addData("Last Ring Count", ringCountOnFieldLast);
+            telemetry.addData("Ring Count Confirmed", ringFoundConfirmed);
+            telemetry.addData("distanceToTargetX ", distanceToTargetX / odoRobot.countsPerInch);
+            telemetry.addData("distanceToTargetY ", distanceToTargetY / odoRobot.countsPerInch);
+            telemetry.addData("X Position", globalPositionUpdate.returnXCoordinate() / odoRobot.countsPerInch);
+            telemetry.addData("Y Position", globalPositionUpdate.returnYCoordinate() / odoRobot.countsPerInch);
+            telemetry.update();
         }
 
 
@@ -116,28 +119,14 @@ public class VortexOdometryAuto extends LinearOpMode {
 
             switch (step) {
                 case confirmation:
-                    //if (ringCountOnField == Constants.RING_COUNT_FOUR || ringCountOnField == Constants.RING_COUNT_ONE
-                    //|| ringCountOnField == Constants.RING_COUNT_ZERO ) {
-                    //}
+                    //if (ringCountOnField == ringCountOnFieldLast && ringFoundConfirmed) {
+
                     ringCountOnField = "Quad";
+
                     step = Step.mvForward;
+                    //}
                     break;
 
-//                case testMv:
-//                    // Goto Position A on the filed to deliver wobble goal
-//                    move_fwd = true;
-//                    targetX = 06;
-//                    targetY = 36;
-//                    distanceToTargetX = targetX * odoRobot.countsPerInch - globalPositionUpdate.returnXCoordinate();
-//                    distanceToTargetY = targetY * odoRobot.countsPerInch - globalPositionUpdate.returnYCoordinate();
-//                    distance = Math.hypot(distanceToTargetX, distanceToTargetY);
-//                    //gotoPosition(globalPositionUpdate, targetX, targetY, 0.3, 0.0, 1.0 );
-//
-//                    moveToPoint(globalPositionUpdate, targetX, targetY, 0.8, 0.12, 00.0);
-//                    if (distanceToTargetY < 0) {
-//                        step = Step.robotTurn;
-//                    }
-//                    break;
 
                 // 1. Go forward by X distance
                 // 2. Strafe for Y distance - needed only for B
@@ -148,119 +137,182 @@ public class VortexOdometryAuto extends LinearOpMode {
                 // 7. Park the robot
 
                 case mvForward:
-                    targetX = 00;
-                    targetY = 87;
+
                     move_fwd = true;
-                    //moveToPoint(globalPositionUpdate, targetX, targetY, 1.0, 0.0, 00.0);
+
+                    startXPos = globalPositionUpdate.returnXCoordinate() / odoRobot.countsPerInch;
+                    startYPos = globalPositionUpdate.returnYCoordinate() / odoRobot.countsPerInch;
+
+                    if (ringCountOnField == "Quad") {
+                        LeftDist = 15;
+                        fwdDist = 95;
+                        backDist = 65;
+                        rightDist = 0;
+
+                    } else if (ringCountOnField == "Single") {
+                        LeftDist = 15;
+                        fwdDist = 75;
+                        backDist = 70;
+                        rightDist = 0;
+
+                    } else if (ringCountOnField == "Zero") {
+                        LeftDist = 18;
+                        fwdDist = 40;
+                        backDist = 00;
+                        rightDist = 0;
+                        fwdDist1 = 5; // go forward to shoot
+                    }
+
                     globalPositionUpdate.reverseRightEncoder();
                     globalPositionUpdate.reverseLeftEncoder();
                     SystemClock.sleep(100);
-                    moveToPoint(globalPositionUpdate, targetX, targetY, 0.6, 0.0, 00.0);
+
+                    xAxisDistInch = globalPositionUpdate.returnXCoordinate() / odoRobot.countsPerInch;
+                    yAxisDistInch = globalPositionUpdate.returnYCoordinate() / odoRobot.countsPerInch;
+
+                    targetX = 0;
+                    targetY = fwdDist + yAxisDistInch;
+
+                    moveToPoint(globalPositionUpdate, targetX, targetY, 0.8, 0.0, 00.0);
 
                     // 2. Strafe for X distance for B or else move to drop wobble
                     if (yAxisDistInch >= targetY && ringCountOnField == "Single") {
-                        step = Step.mvStrafe;
+                        step = Step.mvLeft;
                         move_fwd = false;
-                    } else if (yAxisDistInch >= targetY ) {
+                        move_side = true;
+                        odoRobot.robotStop();
+                        SystemClock.sleep(200);
+
+                    } else if (yAxisDistInch >= targetY) {
                         step = Step.dropWobble;
-//                        step = Step.mvBack;
                         move_fwd = false;
                         odoRobot.robotStop();
+                        SystemClock.sleep(200);
 
                     }
                     break;
 
-                case mvStrafe:
-                    targetX = -12;
+
+                case dropWobble:
                     targetY = 0;
-                    move_fwd = false;
-                    move_side = true;
-                    //moveToPoint(globalPositionUpdate, targetX, targetY, 0.8, 0.0, 00.0);
-                    if (distanceToTargetX < 0 ) {
-                        step = Step.dropWobble;
-                    }
-                    break;
-
-                case dropWobble :
-                    targetY = 00;
-                    targetX = 00;
-
-                    // 3. Drop wobble goal
-                    // code to drop wobble goal in the next block
+                    targetX = 0;
+                    odoRobot.arm.setTargetPosition(200);
+                    odoRobot.arm.setPower(-1);
+                    SystemClock.sleep(200);
+                    odoRobot.arm.setPower(-0.2);
+                    SystemClock.sleep(250);
+                    odoRobot.arm.setPower(0);
+                    SystemClock.sleep(1250);
+                    odoRobot.claw.setPosition(-1);
+                    SystemClock.sleep(1000);
+                    //upwards
+                    odoRobot.arm.setTargetPosition(0);
+                    odoRobot.arm.setPower(0.5);
+                    SystemClock.sleep(300);
+                    odoRobot.arm.setPower(0.3);
+                    SystemClock.sleep(200);
+                    odoRobot.arm.setPower(0);
+                    SystemClock.sleep(100);
+                    odoRobot.claw.setPosition(1);
+                    SystemClock.sleep(100);
+                    odoRobot.robotStop();
 
                     // 4. Now back to shooting line , move backwards
                     // code to drop wobble goal in the next block
-                    step = Step.mvBack;
+                    if (ringCountOnField == "Quad" ||  ringCountOnField == "Single") {
+                        step = Step.mvBack;
+
+                    } else if (ringCountOnField == "Zero") {
+                        step = Step.stop;
+                    }
                     break;
 
                 case mvBack:
                     // 4. Now back to shooting line , move backwards
                     // code to drop wobble goal in the next block
-                    if (ringCountOnField == "Quad") {
-                        targetX = 00;
-                        targetY = -60;
-                        move_back = true;
-                        globalPositionUpdate.reverseRightEncoder();
-                        globalPositionUpdate.reverseLeftEncoder();
-                        SystemClock.sleep(100);
 
-                        //move_fwd = false;
-                        //move_side = false;
-                        //move_back = true;
-                        //SystemClock.sleep(2000);
-                        //distanceToTargetX = targetX * odoRobot.countsPerInch - globalPositionUpdate.returnXCoordinate();
-                        //distanceToTargetY = targetY * odoRobot.countsPerInch - globalPositionUpdate.returnYCoordinate();
-                        xAxisDistInch = globalPositionUpdate.returnXCoordinate() / odoRobot.countsPerInch;
-                        yAxisDistInch = globalPositionUpdate.returnYCoordinate() / odoRobot.countsPerInch;
 
-                        moveToPoint(globalPositionUpdate, targetX, targetY, -0.6, 0.0, 00.0);
-                        //telemetry.addData("1- Y Position", yAxisDistInch);
-                        //telemetry.update();
-                        //SystemClock.sleep(2000);
-                        //yAxisDistInch < targetY
-                        if (yAxisDistInch >= targetY)  {
-                            step = Step.mvLeft;
-                            move_back = false;
-                            odoRobot.robotStop();
-                        }
-                        break;
+                    globalPositionUpdate.reverseRightEncoder();
+                    globalPositionUpdate.reverseLeftEncoder();
+                    SystemClock.sleep(100);
+                    xAxisDistInch = globalPositionUpdate.returnXCoordinate() / odoRobot.countsPerInch;
+                    yAxisDistInch = globalPositionUpdate.returnYCoordinate() / odoRobot.countsPerInch;
+
+                    targetX = 00;
+                    targetY = -backDist;
+                    move_back = true;
+
+
+
+                    moveToPoint(globalPositionUpdate, targetX, targetY, -0.7, 0.0, 00.0);
+
+                    if (yAxisDistInch >= targetY)  {
+                        move_side = true;
+                        move_back = false;
+                        odoRobot.robotStop();
+                        SystemClock.sleep(500);
                     }
+
+                    if( ringCountOnField == "Single") {
+                        step = Step.shootRing;
+                    } else {
+                        step = Step.mvLeft;
+                    }
+
+//                    telemetry.addData("1- Y Position", yAxisDistInch);
+//                    telemetry.update();
+//                    SystemClock.sleep(2000);
+
+
+
                     break;
 
                 case mvLeft:
                     // 4. Now move left to align with high goal shooting line
-                    sideTargetX = 15;
-                    sideTargetY = 0;
-                    //move_back = true;
-//                    telemetry.addData("10- X Position", xAxisDistInch);
-//                    telemetry.update();
-//                    SystemClock.sleep(2000);
-                    //globalPositionUpdate.reverseCenterEncoder();
-                    //SystemClock.sleep(50);
-//                    telemetry.addData("11- X Position", xAxisDistInch);
-//                    telemetry.update();
-//                    SystemClock.sleep(2000);
 
                     xAxisDistInch = globalPositionUpdate.returnXCoordinate() / odoRobot.countsPerInch;
                     yAxisDistInch = globalPositionUpdate.returnYCoordinate() / odoRobot.countsPerInch;
-                    moveLeft(globalPositionUpdate, sideTargetX, sideTargetY, -0.4, 0.0, 00.0);
 
-//                    telemetry.addData("1- X Position", xAxisDistInch);
-//                    telemetry.update();
-//                    SystemClock.sleep(2000);
+                    sideTargetX = xAxisDistInch - LeftDist;
+                    sideTargetY = 0;
+                    moveLeft(globalPositionUpdate, sideTargetX, sideTargetY, -0.5, 0.0, 00.0);
 
-                    if (xAxisDistInch <= -sideTargetX)  {
-                        step = Step.stop;
+
+
+                    if (xAxisDistInch <= sideTargetX)  {
                         odoRobot.robotStop();
                     }
+
+                    if( ringCountOnField == "Single") {
+                        step = Step.dropWobble;
+                    } else {
+                        step = Step.shootRing;
+                    }
+
                     break;
 
-                case mvRight:
-                    // 4. Now move left to align with high goal shooting line
+                case shootRing:
 
-                    sideTargetX = 15;
-                    sideTargetY = 0;
-                    //move_back = true;
+
+                    odoRobot.shooting1.setPower(-0.5);
+                    odoRobot.shooting2.setPower(-0.5);
+                    SystemClock.sleep(2500);
+
+                    for (int i =1; i<=3; i++){
+                        odoRobot.ringPush.setPosition(-1);
+                        SystemClock.sleep(1000);
+                        odoRobot.ringPush.setPosition(1);
+                        SystemClock.sleep(1000);
+                    }
+                    odoRobot.shooting1.setPower(0);
+                    odoRobot.shooting2.setPower(0);
+
+                    step = Step.park;
+
+                    break;
+
+
+                case park:
 
                     globalPositionUpdate.reverseRightEncoder();
                     globalPositionUpdate.reverseLeftEncoder();
@@ -269,37 +321,19 @@ public class VortexOdometryAuto extends LinearOpMode {
                     xAxisDistInch = globalPositionUpdate.returnXCoordinate() / odoRobot.countsPerInch;
                     yAxisDistInch = globalPositionUpdate.returnYCoordinate() / odoRobot.countsPerInch;
 
-                    moveRight(globalPositionUpdate, sideTargetX, sideTargetY, 0.5, 0.0, 00.0);
-                    telemetry.addData("1- X Position", xAxisDistInch);
-                    telemetry.update();
-                    SystemClock.sleep(2000);
+                    targetX = 0;
+                    targetY = 10 + yAxisDistInch;
 
-                    if (xAxisDistInch >= sideTargetX)  {
+                    moveToPoint(globalPositionUpdate, targetX, targetY, 0.8, 0.0, 00.0);
+                    if (yAxisDistInch >= targetY) {
                         step = Step.stop;
                         odoRobot.robotStop();
-                    }
-                    break;
-
-                case shootRing:
-                    // 4. Now back to shooting line , move backwards
-                    // code to drop wobble goal in the next block
-
-
-                    break;
-
-
-                case robotTurn:
-                    if (step == Step.robotTurn) {
-                        double dAngle = 200;
-                        //odoRobot.robotTurn(tRight, dAngle, tAngle, fwdPwr);
-                        break;
+                        SystemClock.sleep(200);
                     }
 
-
-                    if (globalPositionUpdate.returnAngleDegree() < 0) {
-                        step = Step.robotTurn;
-                    }
                     break;
+                //robot.moveUpdate();
+
                 case stop:
                     odoRobot.FLMotor.setPower(0);
                     odoRobot.BLMotor.setPower(0);
@@ -309,7 +343,24 @@ public class VortexOdometryAuto extends LinearOpMode {
                 //robot.moveUpdate();
             }
 
-            //robot.moveUpdate();
+//            if (ringCountOnField == null) {
+//                rVision.updateRingCount();
+//                ringCountOnField = rVision.getRingCount();
+//                SystemClock.sleep(2000);
+//                if (currentTime > 3.0) {
+//                    ringCountOnField = "Zero";
+//                    ringCountOnFieldLast = ringCountOnField;
+//                    ringFoundConfirmed = true;
+//
+//                } else {
+//                    rVision.updateRingCount();
+//                    ringCountOnField = rVision.getRingCount();
+//                }
+//            } else {
+//                ringFoundConfirmed = true;
+//            }
+
+
 
             telemetry.addData("Current Time", "%s", currentTime);
             telemetry.addData("VortexStep", "%s", step);
@@ -317,6 +368,10 @@ public class VortexOdometryAuto extends LinearOpMode {
 
             telemetry.addData("distanceToTargetX ", distanceToTargetX / odoRobot.countsPerInch);
             telemetry.addData("distanceToTargetY ", distanceToTargetY / odoRobot.countsPerInch);
+
+            telemetry.addData("RingCount", "%s", ringCountOnField);
+            telemetry.addData("Last Ring Count", "%s", ringCountOnFieldLast);
+            telemetry.addData("Ring Count Confirmed", "%s", ringFoundConfirmed);
 
             telemetry.addData("X Position", globalPositionUpdate.returnXCoordinate() / odoRobot.countsPerInch);
             telemetry.addData("Y Position", globalPositionUpdate.returnYCoordinate() / odoRobot.countsPerInch);
@@ -342,17 +397,13 @@ public class VortexOdometryAuto extends LinearOpMode {
         xAxisDistInch = ngpu.returnXCoordinate() / odoRobot.countsPerInch;
         yAxisDistInch = ngpu.returnYCoordinate() / odoRobot.countsPerInch;
 
-        // This only supports moving to Y direction
-
-        // 0 ... 80 and target is 80
-        // 85 ....50 and target is 45
 
 //        telemetry.addData("2- Y Position", yAxisDistInch);
 //        telemetry.update();
 //        SystemClock.sleep(2000);
-        while ((yAxisDistInch < tY && move_fwd == true) || (yAxisDistInch < tY && move_back == true)) {
+        //while ((yAxisDistInch < tY && move_fwd == true) || (yAxisDistInch < tY && move_back == true)) {
+        while (yAxisDistInch < tY ) {
 
-            //while ((y_axisDistanceInInch < targetY && move_fwd == true) || (y_axisDistanceInInch > targetY && move_back == true)) {
 
             distanceToTargetX = tX * odoRobot.countsPerInch - ngpu.returnXCoordinate();
             distanceToTargetY = tY * odoRobot.countsPerInch - ngpu.returnYCoordinate();
@@ -464,7 +515,7 @@ public class VortexOdometryAuto extends LinearOpMode {
 //        SystemClock.sleep(2000);
         //while (xAxisDistInch < targetX) { // This line woks for right turn
 
-        while (xAxisDistInch > -tX) {
+        while (xAxisDistInch > tX) {
 
             distanceToTargetX = tX * odoRobot.countsPerInch - ngpu.returnXCoordinate();
             distanceToTargetY = tY * odoRobot.countsPerInch - ngpu.returnYCoordinate();
@@ -525,45 +576,7 @@ public class VortexOdometryAuto extends LinearOpMode {
     }
 
 
-    /**
-     * Takes the horizontal power, vertical power, and pivoting power and determine how much power to apply to each wheel, and normalizes the max poer
-     *
-     * @param horizontal the horizontal (x vector) power
-     * @param vertical   the vertical (y vector) power
-     * @param pivot      the pivoting power
-     * @param maxPower   the max power the wheels can move
-     */
-    public double[] rawSlide ( double horizontal, double vertical, double pivot, double maxPower)
-    {
-        //create an array with all the speeds
-        double powers[] = {vertical + horizontal + pivot, vertical - horizontal + pivot, vertical - horizontal - pivot, vertical + horizontal - pivot};
 
-        //Only adjust speeds if the robot is moving
-        if (horizontal != 0 || vertical != 0) {
-            int max = 0;
-            int counter = 0;
-
-            //determine the maximum speed out of the four motors
-            for (double element : powers) {
-                if (Math.abs(element) > Math.abs(powers[max])) {
-                    max = counter;
-                }
-                counter++;
-            }
-
-            //set the maximum as a variable
-            double maxCalculatedPower = Math.abs(powers[max]);
-
-            //divide all of the speeds by the max speed to make sure that
-            if (maxCalculatedPower != 0) {
-                powers[0] = powers[0] / maxCalculatedPower * maxPower;
-                powers[1] = powers[1] / maxCalculatedPower * maxPower;
-                powers[2] = powers[2] / maxCalculatedPower * maxPower;
-                powers[3] = powers[3] / maxCalculatedPower * maxPower;
-            }
-        }
-        return powers;
-    }
 
 
 }
