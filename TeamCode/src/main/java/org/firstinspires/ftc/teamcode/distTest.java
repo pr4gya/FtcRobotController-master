@@ -4,6 +4,7 @@ import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 import HelperClass.OdometryRobot;
 import Odometry.Main.Odometry;
+import Hardware.DriveTrainNew;
 
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 
@@ -19,7 +20,7 @@ OdometryRobot robot =  new OdometryRobot();
         robot.init(hardwareMap);
 
 
-        while(!opModeIsActive() && !isStopRequested()){
+        while (!opModeIsActive() && !isStopRequested()) {
             telemetry.addData("Status", "Initialized 1");
             telemetry.addData("rangeFront", robot.rangeFront);
             telemetry.addData("rangeLeft", robot.rangeLeft);
@@ -30,7 +31,7 @@ OdometryRobot robot =  new OdometryRobot();
                 robot.move(1.0, 2.0);
             }
 
-            while(opModeIsActive()){
+            while (opModeIsActive()) {
 
                 robot.goalShootAlign(0.45);
 
@@ -42,4 +43,20 @@ OdometryRobot robot =  new OdometryRobot();
             }
         }
     }
+    public void gotowall(speed) {
+        // saves the distance from the wall in a variable.
+        // Assuming that the robot is already facing the front.
+        distfromwall_cm = robot.rangeFront;
+        //while the robot is farther than 5cm away from the wall it will keep moving towards the wall
+        while (robot.rangeFront > (distfromwall_cm - 5)) {
+            //sets the powers for the motors
+          robot.FLMotor.setpower(speed);
+          robot.FRMotor.setpower(speed);
+          robot.BLMotor.setpower(speed);
+          robot.BRMotor.setpower(speed);
+        }
+
+    }
+
 }
+//gotowall(1);
