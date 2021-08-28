@@ -61,7 +61,7 @@ public class VortexOdometryAuto extends LinearOpMode {
     //enum vars defined
     private enum Step {
         confirmation, startMv, mvForward, robotTurn, checkRings, mvBack, mvLeft, mvRight, mvStrafe, dropWobble, shootRing,
-        launchLine, quad, single, none, angleAdj, park, stop, turnL, deliverWobble, testMv, mvFwd2
+        launchLine, quad, single, none, angleAdj, park, stop, turnL, deliverWobble, testMv
     }
 
     private Step step = Step.confirmation;
@@ -96,7 +96,6 @@ public class VortexOdometryAuto extends LinearOpMode {
             rVision.updateRingCount();
             ringCountOnField = rVision.getRingCount();
             ringCountOnFieldLast = ringCountOnField;
-            odoRobot.ringPush.setPosition(1);
             odoRobot.claw.setPosition(1);
             telemetry.addData("RingCount", ringCountOnField);
             telemetry.addData("Last Ring Count", ringCountOnFieldLast);
@@ -122,8 +121,7 @@ public class VortexOdometryAuto extends LinearOpMode {
                 case confirmation:
                     //if (ringCountOnField == ringCountOnFieldLast && ringFoundConfirmed) {
 
-//                    ringCountOnField = "Quad";
-
+                    ringCountOnField = "Quad";
 
                     step = Step.mvForward;
                     //}
@@ -146,23 +144,23 @@ public class VortexOdometryAuto extends LinearOpMode {
                     startYPos = globalPositionUpdate.returnYCoordinate() / odoRobot.countsPerInch;
 
                     if (ringCountOnField == "Quad") {
-                        LeftDist = 17;
-                        fwdDist = 86;
-                        backDist = 60;
+                        LeftDist = 15;
+                        fwdDist = 95;
+                        backDist = 65;
                         rightDist = 0;
 
                     } else if (ringCountOnField == "Single") {
-                        LeftDist = 17;
-                        fwdDist = 58;
-                        backDist = 55;
+                        LeftDist = 15;
+                        fwdDist = 75;
+                        backDist = 70;
                         rightDist = 0;
 
                     } else if (ringCountOnField == "Zero") {
-                        LeftDist = 19;
-                        fwdDist = 37;
-                        backDist = 0;
+                        LeftDist = 18;
+                        fwdDist = 40;
+                        backDist = 00;
                         rightDist = 0;
-                        fwdDist1 = 6; // go forward to shoot
+                        fwdDist1 = 5; // go forward to shoot
                     }
 
                     globalPositionUpdate.reverseRightEncoder();
@@ -198,35 +196,34 @@ public class VortexOdometryAuto extends LinearOpMode {
                 case dropWobble:
                     targetY = 0;
                     targetX = 0;
-//                    odoRobot.arm.setTargetPosition(200);
-//                    odoRobot.arm.setPower(-0.75);
-//                    SystemClock.sleep(250);
-//                    odoRobot.arm.setPower(-0.5);
-//                    SystemClock.sleep(200);
-//                    odoRobot.arm.setPower(-0.3);
-//                    SystemClock.sleep(250);
-//                    odoRobot.arm.setPower(0);
-//                    SystemClock.sleep(2000);
-//                    odoRobot.claw.setPosition(-1);
-//
-//                    //upwards
-//                    odoRobot.arm.setTargetPosition(0);
-//                    odoRobot.arm.setPower(0.65);
-//                    SystemClock.sleep(600);
-//                    odoRobot.arm.setPower(0.4);
-//                    SystemClock.sleep(200);
-//                    odoRobot.arm.setPower(0);
-//                    SystemClock.sleep(100);
-//                    odoRobot.claw.setPosition(1);
-//                    SystemClock.sleep(100);
-//                    odoRobot.robotStop();
-                    SystemClock.sleep(1500);
+                    odoRobot.arm.setTargetPosition(200);
+                    odoRobot.arm.setPower(-1);
+                    SystemClock.sleep(200);
+                    odoRobot.arm.setPower(-0.2);
+                    SystemClock.sleep(250);
+                    odoRobot.arm.setPower(0);
+                    SystemClock.sleep(1250);
+                    odoRobot.claw.setPosition(-1);
+                    SystemClock.sleep(1000);
+                    //upwards
+                    odoRobot.arm.setTargetPosition(0);
+                    odoRobot.arm.setPower(0.5);
+                    SystemClock.sleep(300);
+                    odoRobot.arm.setPower(0.3);
+                    SystemClock.sleep(200);
+                    odoRobot.arm.setPower(0);
+                    SystemClock.sleep(100);
+                    odoRobot.claw.setPosition(1);
+                    SystemClock.sleep(100);
+                    odoRobot.robotStop();
 
-                    if (ringCountOnField == "Quad" || ringCountOnField == "Single") {
+                    // 4. Now back to shooting line , move backwards
+                    // code to drop wobble goal in the next block
+                    if (ringCountOnField == "Quad" ||  ringCountOnField == "Single") {
                         step = Step.mvBack;
 
                     } else if (ringCountOnField == "Zero") {
-                        step = Step.mvLeft;
+                        step = Step.stop;
                     }
                     break;
 
@@ -246,16 +243,17 @@ public class VortexOdometryAuto extends LinearOpMode {
                     move_back = true;
 
 
+
                     moveToPoint(globalPositionUpdate, targetX, targetY, -0.7, 0.0, 00.0);
 
-                    if (yAxisDistInch >= targetY) {
+                    if (yAxisDistInch >= targetY)  {
                         move_side = true;
                         move_back = false;
                         odoRobot.robotStop();
                         SystemClock.sleep(500);
                     }
 
-                    if (ringCountOnField == "Single") {
+                    if( ringCountOnField == "Single") {
                         step = Step.shootRing;
                     } else {
                         step = Step.mvLeft;
@@ -264,6 +262,7 @@ public class VortexOdometryAuto extends LinearOpMode {
 //                    telemetry.addData("1- Y Position", yAxisDistInch);
 //                    telemetry.update();
 //                    SystemClock.sleep(2000);
+
 
 
                     break;
@@ -278,54 +277,28 @@ public class VortexOdometryAuto extends LinearOpMode {
                     sideTargetY = 0;
                     moveLeft(globalPositionUpdate, sideTargetX, sideTargetY, -0.5, 0.0, 00.0);
 
-                    if (xAxisDistInch <= sideTargetX) {
+
+
+                    if (xAxisDistInch <= sideTargetX)  {
                         odoRobot.robotStop();
                     }
 
-                    if (ringCountOnField == "Single") {
+                    if( ringCountOnField == "Single") {
                         step = Step.dropWobble;
-
-                    } else if (ringCountOnField == "Zero") {
-                        step = Step.mvFwd2;
                     } else {
                         step = Step.shootRing;
                     }
 
                     break;
 
-
-                case mvFwd2:
-                    move_fwd = true;
-                    startXPos = globalPositionUpdate.returnXCoordinate() / odoRobot.countsPerInch;
-                    startYPos = globalPositionUpdate.returnYCoordinate() / odoRobot.countsPerInch;
-                    SystemClock.sleep(100);
-                    xAxisDistInch = globalPositionUpdate.returnXCoordinate() / odoRobot.countsPerInch;
-                    yAxisDistInch = globalPositionUpdate.returnYCoordinate() / odoRobot.countsPerInch;
-//                    globalPositionUpdate.reverseRightEncoder();
-//                    globalPositionUpdate.reverseLeftEncoder();
-
-                    SystemClock.sleep(100);
-                    targetX = 0;
-                    targetY = 13 + yAxisDistInch;
-                    moveToPoint(globalPositionUpdate, targetX, targetY, 0.8, 0.0, 00.0);
-//
-                    if (yAxisDistInch >= targetY) {
-                        step = Step.shootRing;
-                        move_fwd = false;
-                        move_side = false;
-                        odoRobot.robotStop();
-                    }
-                    break;
-
-
                 case shootRing:
-                    odoRobot.shooting1.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
-                    odoRobot.shooting2.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
-                    odoRobot.shooting1.setPower(-0.51);
-                    odoRobot.shooting2.setPower(-0.51);
-                    SystemClock.sleep(2000);
 
-                    for (int i = 1; i <= 3; i++) {
+
+                    odoRobot.shooting1.setPower(-0.5);
+                    odoRobot.shooting2.setPower(-0.5);
+                    SystemClock.sleep(2500);
+
+                    for (int i =1; i<=3; i++){
                         odoRobot.ringPush.setPosition(-1);
                         SystemClock.sleep(1000);
                         odoRobot.ringPush.setPosition(1);
@@ -333,29 +306,31 @@ public class VortexOdometryAuto extends LinearOpMode {
                     }
                     odoRobot.shooting1.setPower(0);
                     odoRobot.shooting2.setPower(0);
+
                     step = Step.park;
+
                     break;
 
 
-
                 case park:
-                    if(ringCountOnField=="Quad" || ringCountOnField =="Single") {
-                        globalPositionUpdate.reverseRightEncoder();
-                        globalPositionUpdate.reverseLeftEncoder();
-                        SystemClock.sleep(100);
-                    }
+
+                    globalPositionUpdate.reverseRightEncoder();
+                    globalPositionUpdate.reverseLeftEncoder();
+                    SystemClock.sleep(100);
+
                     xAxisDistInch = globalPositionUpdate.returnXCoordinate() / odoRobot.countsPerInch;
                     yAxisDistInch = globalPositionUpdate.returnYCoordinate() / odoRobot.countsPerInch;
+
                     targetX = 0;
-                    targetY = 8 + yAxisDistInch;
+                    targetY = 10 + yAxisDistInch;
+
                     moveToPoint(globalPositionUpdate, targetX, targetY, 0.8, 0.0, 00.0);
-                    xAxisDistInch = globalPositionUpdate.returnXCoordinate() / odoRobot.countsPerInch;
-                    yAxisDistInch = globalPositionUpdate.returnYCoordinate() / odoRobot.countsPerInch;
                     if (yAxisDistInch >= targetY) {
                         step = Step.stop;
                         odoRobot.robotStop();
                         SystemClock.sleep(200);
                     }
+
                     break;
                 //robot.moveUpdate();
 
@@ -368,22 +343,22 @@ public class VortexOdometryAuto extends LinearOpMode {
                 //robot.moveUpdate();
             }
 
-            if (ringCountOnField == null) {
-                rVision.updateRingCount();
-                ringCountOnField = rVision.getRingCount();
-                SystemClock.sleep(2000);
-                if (currentTime > 0.0) {
-                    ringCountOnField = "Zero";
-                    ringCountOnFieldLast = ringCountOnField;
-                    ringFoundConfirmed = true;
-
-                } else {
-                    rVision.updateRingCount();
-                    ringCountOnField = rVision.getRingCount();
-                }
-            } else {
-                ringFoundConfirmed = true;
-            }
+//            if (ringCountOnField == null) {
+//                rVision.updateRingCount();
+//                ringCountOnField = rVision.getRingCount();
+//                SystemClock.sleep(2000);
+//                if (currentTime > 3.0) {
+//                    ringCountOnField = "Zero";
+//                    ringCountOnFieldLast = ringCountOnField;
+//                    ringFoundConfirmed = true;
+//
+//                } else {
+//                    rVision.updateRingCount();
+//                    ringCountOnField = rVision.getRingCount();
+//                }
+//            } else {
+//                ringFoundConfirmed = true;
+//            }
 
 
 
@@ -605,3 +580,17 @@ public class VortexOdometryAuto extends LinearOpMode {
 
 
 }
+
+
+
+
+
+
+
+
+
+
+
+
+
+

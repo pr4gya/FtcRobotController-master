@@ -27,6 +27,9 @@ import org.firstinspires.ftc.robotcore.external.navigation.AxesOrder;
 import org.firstinspires.ftc.robotcore.external.navigation.AxesReference;
 import org.firstinspires.ftc.robotcore.external.navigation.Orientation;
 
+import com.qualcomm.hardware.modernrobotics.ModernRoboticsI2cRangeSensor;
+import org.firstinspires.ftc.robotcore.external.navigation.DistanceUnit;
+
 import org.firstinspires.ftc.teamcode.Vortex14969RedAutonomous;
 
 public class Robot {
@@ -99,7 +102,7 @@ public class Robot {
     /* local OpMode members. */
     HardwareMap hwMap = null;
     public ElapsedTime period = new ElapsedTime();
-
+    public ModernRoboticsI2cRangeSensor rangeFront, rangeLeft, rangeRight;
 
     public void Robot() {
 
@@ -234,6 +237,9 @@ public class Robot {
 
         imu.initialize(parameters);
 
+        // Range Sensor
+        rangeFront = hwMap.get(ModernRoboticsI2cRangeSensor.class, "range_front"); // I2C Port -1
+        rangeRight = hwMap.get(ModernRoboticsI2cRangeSensor.class, "range_right"); // I2C Port -2
 
     }
 

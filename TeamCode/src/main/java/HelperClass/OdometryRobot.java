@@ -26,9 +26,14 @@ import org.firstinspires.ftc.robotcore.external.navigation.AxesOrder;
 import org.firstinspires.ftc.robotcore.external.navigation.AxesReference;
 import org.firstinspires.ftc.robotcore.external.navigation.Orientation;
 
+import com.qualcomm.hardware.modernrobotics.ModernRoboticsI2cRangeSensor;
+import org.firstinspires.ftc.robotcore.external.navigation.DistanceUnit;
+
 import java.util.concurrent.TimeUnit;
 
 public class OdometryRobot {
+
+    public ModernRoboticsI2cRangeSensor rangeFront, rangeLeft, rangeRight;
 
     /* Rev Expansion IMU Sensors */
     public static BNO055IMU imu;
@@ -206,6 +211,10 @@ public class OdometryRobot {
 
         imu.initialize(parameters);
 
+        // Range Sensor
+        rangeFront = hwMap.get(ModernRoboticsI2cRangeSensor.class, "range_front"); // I2C Port -1
+        rangeRight = hwMap.get(ModernRoboticsI2cRangeSensor.class, "range_right"); // I2C Port -2
+
 
     }
 
@@ -331,6 +340,79 @@ public class OdometryRobot {
     public float imuAngleInRad() {
         angles = imu.getAngularOrientation(AxesReference.INTRINSIC, AxesOrder.ZYX, AngleUnit.RADIANS);
         return (angles.firstAngle);
+    }
+
+    /*
+     * This method uses range sensor to adjust the distance from sidewall & front wall and always in right place to shoot high goal
+     * Step 1 - Checks the frontwall senssor and adjust the front or back movements
+     * Step 2 - Checks the sidewall sensor and adjust the left or right movement
+     * Step 3 - Adjust the angle to make sure always IMU angle is between 359 - 360 or 0 - 1 degree
+     *
+     *
+     */
+    public void goalShootAlign(double speed) {
+        double distanceFront = 1;
+        double distanceLeft = 1;
+        double distanceRight = 1; // currently we are not using right sensor
+        distanceFront = rangeFront.getDistance(DistanceUnit.CM);
+        distanceRight = rangeRight.getDistance(DistanceUnit.CM);
+        if (distanceFront > Constants.FRONT_RANGE_CM) {
+            // go forward
+            FLMotor.setPower(speed);
+            BLMotor.setPower(speed);
+            FRMotor.setPower(speed);
+            BRMotor.setPower(speed);
+            while (distanceFront > Constants.FRONT_RANGE_CM) {
+                // Check front distance from wall
+                distanceFront = rangeFront.getDistance(DistanceUnit.CM);
+            }
+            if (distanceFront <= Constants.FRONT_RANGE_CM) {
+                robotStop();
+            }
+        } else if (distanceFront < Constants.FRONT_RANGE_CM) {
+            // move back
+            FLMotor.setPower(-speed);
+            BLMotor.setPower(-speed);
+            FRMotor.setPower(-speed);
+            BRMotor.setPower(-speed);
+            while (distanceFront < Constants.FRONT_RANGE_CM) {
+                // Check front distance from wall
+                distanceFront = rangeFront.getDistance(DistanceUnit.CM);
+            }
+            if (distanceFront >= Constants.FRONT_RANGE_CM) {
+                robotStop();
+            }
+        }
+        distanceRight = rangeRight.getDistance(DistanceUnit.CM);
+        SystemClock.sleep(250);
+        // Step -2 Now adjust the side distance
+        if (distanceRight > Constants.RIGHT_RANGE_CM) {
+            // move right
+            FLMotor.setPower(speed);
+            BLMotor.setPower(-speed);
+            FRMotor.setPower(-speed);
+            BRMotor.setPower(speed);
+            while (distanceRight > Constants.RIGHT_RANGE_CM) {
+                // Check right distance from wall
+                distanceRight = rangeRight.getDistance(DistanceUnit.CM);
+            }
+            if (distanceRight <= Constants.RIGHT_RANGE_CM) {
+                robotStop();
+            }
+        } else if (distanceRight < Constants.RIGHT_RANGE_CM) {
+            // move left
+            FLMotor.setPower(-speed);
+            BLMotor.setPower(speed);
+            FRMotor.setPower(speed);
+            BRMotor.setPower(-speed);
+            while (distanceRight < Constants.RIGHT_RANGE_CM) {
+                // Check right distance from wall
+                distanceRight = rangeRight.getDistance(DistanceUnit.CM);
+            }
+            if (distanceRight >= Constants.RIGHT_RANGE_CM) {
+                robotStop();
+            }
+        }
     }
 
 }

@@ -13,7 +13,7 @@ import com.qualcomm.robotcore.util.Range;
 import org.firstinspires.ftc.robotcore.external.navigation.DistanceUnit;
 
 
-@TeleOp(name="New TeleOp", group="Pushbot")
+@TeleOp(name="Optimized TeleOp", group="Pushbot")
 public class Teleop extends LinearOpMode {
 
     Robot robot = new Robot();
@@ -25,6 +25,10 @@ public class Teleop extends LinearOpMode {
     double red_side_wall_distance;
     double shootPower = 0;
     public double angleOne;
+    int y = 0;
+
+    double p = 0.4;
+    double a = 0;
 
     @Override
     public void runOpMode() throws InterruptedException {
@@ -104,22 +108,35 @@ public class Teleop extends LinearOpMode {
 
         //autonomous optimizations
             //high goal shooting
-            if (gamepad2.dpad_up){
-                robot.shooting1.setPower(0.5);
-                robot.shooting2.setPower(0.5);
-                for (int i =1; i>=3; i++){
-                    SystemClock.sleep(2500);
+
+
+
+            if (gamepad1.a){
+                robot.shooting1.setPower(-p);
+                robot.shooting2.setPower(-0.2);
+                SystemClock.sleep(500);
+                for (int i =1; i<=3; i++){
                     robot.ringPush.setPosition(-1);
-                    SystemClock.sleep(500);
+                    SystemClock.sleep(300);
                     robot.ringPush.setPosition(1);
-                    SystemClock.sleep(500);
+                    SystemClock.sleep(300);
                 }
                 robot.shooting1.setPower(0);
                 robot.shooting2.setPower(0);
             }
 
+            if (gamepad1.b) {
+                if(y<=3){
+                p=p+0.05;
+                y++;
+                }
+            }
+
+
+
 //            front_distance = robot.frontRange.getDistance(DistanceUnit.INCH);
 //            red_side_wall_distance = robot.redWallRange.getDistance(DistanceUnit.INCH);
+            telemetry.addData("pls", "%f", p);
             telemetry.addData("Status", "Running");
             telemetry.addData("Robot Angle: ", "%f", robot.getRobotAngle());
 //            telemetry.addData("Front range", String.format("%.01f cm", front_distance));

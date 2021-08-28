@@ -12,6 +12,8 @@ import com.qualcomm.robotcore.hardware.Servo;
 import com.qualcomm.robotcore.util.ElapsedTime;
 import com.qualcomm.robotcore.util.Range;
 
+import org.firstinspires.ftc.robotcore.external.navigation.DistanceUnit;
+
 import HelperClass.OdometryRobot;
 
 
@@ -152,6 +154,11 @@ public class OdometerTest extends LinearOpMode {
             telemetry.addData("Vertical left encoder position", robot.leftEncoderMotor.getCurrentPosition());
             telemetry.addData("Vertical right encoder position", robot.rightEncoderMotor.getCurrentPosition());
             telemetry.addData("horizontal encoder position", robot.centerEncoderMotor.getCurrentPosition());
+
+            telemetry.addData("Front Range", "%.2f cm", robot.rangeFront.getDistance(DistanceUnit.CM));
+            telemetry.addData("Right Range", "%.2f cm", robot.rangeFront.getDistance(DistanceUnit.CM));
+            //telemetry.addData(“Front Range”, : “%.2f cm”, robot.rangeFront.getDistance(DistanceUnit.CM));
+            //telemetry.addData(“Right Range”, “%.2f cm”, robot.rangeRight.getDistance(DistanceUnit.CM));
 
 
             telemetry.addData("Thread Active", positionThread.isAlive());

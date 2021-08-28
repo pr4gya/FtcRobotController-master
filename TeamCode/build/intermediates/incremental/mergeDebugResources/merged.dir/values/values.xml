@@ -99,6 +99,11 @@
     <attr format="color" name="backgroundMediumMedium"/>
     <attr format="color" name="backgroundVeryDark"/>
     <attr format="color" name="backgroundVeryVeryDark"/>
+    <attr format="color" name="colorAlmostDark"/>
+    <attr format="color" name="colorMedium"/>
+    <attr format="color" name="colorMediumLight"/>
+    <attr format="color" name="colorMediumMedium"/>
+    <attr format="color" name="colorVeryVeryDark"/>
     <attr format="reference" name="drawerArrowStyle"/>
     <attr format="color" name="feedbackBackground"/>
     <attr format="color" name="feedbackBorder"/>
@@ -663,6 +668,7 @@
     <string name="continuous_servo_description">a continuous rotation servo</string>
     <string name="controlHubDisplayName">Control Hub</string>
     <string name="controlHubFirmwareUpdateMessage">Updating Control Hub firmware with \"%1$s\". Please do not remove power.</string>
+    <string name="controlHubNotAbleToCommunicateWithInternalHub">The Control Hub is not able to communicate with its internal Expansion Hub</string>
     <string name="control_hub_module_name">Control Hub</string>
     <string name="control_hub_usb_device_name">Control Hub Portal</string>
     <string name="controllerPortConnectionInfoFormat">%1$s; port %2$d</string>
@@ -709,7 +715,7 @@
     <string name="edit_swap_devices_activity">Swap USB Devices</string>
     <string name="edit_webcam_activity">Edit Camera</string>
     <string name="errorConfigurationNotFound">"Configuration not found: %s"</string>
-    <string name="errorExpansionHubIsMissing">Expansion Hub \"%s\" was missing at startup. Robot Restart required for hub operation</string>
+    <string name="errorExpansionHubIsMissing">%s was missing at startup. Robot Restart required for hub operation</string>
     <string name="errorFailedToOpenDeviceManager">Failed to open the Device Manager</string>
     <string name="errorOpModeStuck">OpMode \'%1$s\' stuck in %2$s. Restarting robot controller app.</string>
     <string name="errorParsingConfiguration">"Error parsing configuration: %s"</string>
@@ -753,6 +759,7 @@
     <string name="lynxAnalogInputControllerDisplayName">Expansion Hub Analog Input Controller</string>
     <string name="lynxDcMotorControllerDisplayName">Expansion Hub DC Motor Controller</string>
     <string name="lynxDigitalChannelControllerDisplayName">Expansion Hub Digital Channel Controller</string>
+    <string name="lynxFirmwareFileEmpty">the firmware update file is empty</string>
     <string name="lynxFirmwareUpdateAlreadyInProgress">another firmware update is already in progress</string>
     <string name="lynxFirmwareUpdateReadme">Place any downloaded REV Hub firmware updates you wish to install in this folder. You can then install those updates using the Advanced Settings menu on the Driver Station or Robot Controller.</string>
     <string name="lynxI2cDeviceSynchDisplayName">Expansion Hub I2C Device</string>
@@ -888,10 +895,10 @@
     Vuforia and Tensorflow features.  Regardless of whether or not your OpMode uses these features, you must allow
     this permission. It is not possible to run the application without this permission.  You must allow all permissions.</string>
     <string name="permRcReadExternalStorageExplain">The Robot Controller must be able to access external storage
-    for the Blocks and OnBot Java developement environments and robot logging.  It is not possible to run the
+    for the Blocks and OnBot Java development environments and robot logging.  It is not possible to run the
     application without this permission.  You must allow all permissions.</string>
     <string name="permRcWriteExternalStorageExplain">The Robot Controller must be able to access external storage
-    for the Blocks and OnBot Java developement environments and robot logging.  It is not possible to run the
+    for the Blocks and OnBot Java development environments and robot logging.  It is not possible to run the
     application without this permission.  You must allow all permissions.</string>
     <string name="permReadPhoneState">The SDK uses this to access the device serial number.  This may be used
     for diagnostic purposes.  FIRST does not store the serial number off device or use it in any other fashion.
@@ -1165,7 +1172,8 @@
     <string name="usb_vid_name_qualcomm">Qualcomm</string>
     <string name="userSensorTypeBusDefault">port</string>
     <string name="view_logs_activity">View Logs</string>
-    <string name="warning2_4GhzUnnecessaryUsage">You are using the 2.4 GHz WiFi band when both the Robot Controller and Driver Station support 5 GHz. You should consider changing to a 5 GHz WiFi channel</string>
+    <string name="warning2_4GhzUnnecessaryUsage">Both the Robot Controller and Driver Station support 5 GHz. You should consider selecting a 5 GHz WiFi channel</string>
+    <string name="warning2_4GhzUnnecessaryUsageWiFiDirectAuto">Both the Robot Controller and Driver Station support 5 GHz. You should consider selecting a specific 5 GHz WiFi channel (auto may select a 2.4 GHz channel)</string>
     <string name="warningMismatchedAppVersions">The Robot Controller and Driver Station app versions do not match. You should consider updating the %s app</string>
     <string name="warningProblemCommunicatingWithUSBDevice">problem communicating with %s</string>
     <string name="warningTtsFailedToInitialize">Text-to-speech failed to initialize</string>
@@ -1210,6 +1218,12 @@
         <item name="textVeryDark">@color/very_dark_blue</item>
         <item name="textVeryVeryDark">@color/very_very_dark_blue</item>
 
+        <item name="colorMedium">@color/medium_blue</item>
+        <item name="colorMediumMedium">@color/medium_medium_blue</item>
+        <item name="colorMediumLight">@color/medium_light_blue</item>
+        <item name="colorAlmostDark">@color/almost_dark_blue</item>
+        <item name="colorVeryVeryDark">@color/very_very_dark_blue</item>
+
         <item name="backgroundLight">@color/light_blue</item>
         <item name="backgroundMediumLight">@color/medium_light_blue</item>
         <item name="backgroundMedium">@color/medium_blue</item>
@@ -1232,6 +1246,12 @@
         <item name="textMediumDark">@color/medium_dark_green</item>
         <item name="textVeryDark">@color/very_dark_green</item>
         <item name="textVeryVeryDark">@color/very_very_dark_green</item>
+
+        <item name="colorMedium">@color/medium_green</item>
+        <item name="colorMediumMedium">@color/medium_medium_green</item>
+        <item name="colorMediumLight">@color/medium_light_green</item>
+        <item name="colorAlmostDark">@color/almost_dark_green</item>
+        <item name="colorVeryVeryDark">@color/very_very_dark_green</item>
 
         <item name="backgroundLight">@color/light_green</item>
         <item name="backgroundMediumLight">@color/medium_light_green</item>
@@ -1256,6 +1276,12 @@
         <item name="textVeryDark">@color/very_dark_orange</item>
         <item name="textVeryVeryDark">@color/very_very_dark_orange</item>
 
+        <item name="colorMedium">@color/medium_orange</item>
+        <item name="colorMediumMedium">@color/medium_medium_orange</item>
+        <item name="colorMediumLight">@color/medium_light_orange</item>
+        <item name="colorAlmostDark">@color/almost_dark_orange</item>
+        <item name="colorVeryVeryDark">@color/very_very_dark_orange</item>
+
         <item name="backgroundLight">@color/light_orange</item>
         <item name="backgroundMediumLight">@color/medium_light_orange</item>
         <item name="backgroundMedium">@color/medium_orange</item>
@@ -1278,6 +1304,12 @@
         <item name="textMediumDark">@color/medium_dark_purple</item>
         <item name="textVeryDark">@color/very_dark_purple</item>
         <item name="textVeryVeryDark">@color/very_very_dark_purple</item>
+
+        <item name="colorMedium">@color/medium_purple</item>
+        <item name="colorMediumMedium">@color/medium_medium_purple</item>
+        <item name="colorMediumLight">@color/medium_light_purple</item>
+        <item name="colorAlmostDark">@color/almost_dark_purple</item>
+        <item name="colorVeryVeryDark">@color/very_very_dark_purple</item>
 
         <item name="backgroundLight">@color/light_purple</item>
         <item name="backgroundMediumLight">@color/medium_light_purple</item>
@@ -1302,6 +1334,12 @@
         <item name="textVeryDark">@color/very_dark_red</item>
         <item name="textVeryVeryDark">@color/very_very_dark_red</item>
 
+        <item name="colorMedium">@color/medium_red</item>
+        <item name="colorMediumMedium">@color/medium_medium_red</item>
+        <item name="colorMediumLight">@color/medium_light_red</item>
+        <item name="colorAlmostDark">@color/almost_dark_red</item>
+        <item name="colorVeryVeryDark">@color/very_very_dark_red</item>
+
         <item name="backgroundLight">@color/light_red</item>
         <item name="backgroundMediumLight">@color/medium_light_red</item>
         <item name="backgroundMedium">@color/medium_red</item>
@@ -1324,6 +1362,12 @@
         <item name="textMediumDark">@color/medium_dark_teal</item>
         <item name="textVeryDark">@color/very_dark_teal</item>
         <item name="textVeryVeryDark">@color/very_very_dark_teal</item>
+
+        <item name="colorMedium">@color/medium_teal</item>
+        <item name="colorMediumMedium">@color/medium_medium_teal</item>
+        <item name="colorMediumLight">@color/medium_light_teal</item>
+        <item name="colorAlmostDark">@color/almost_dark_teal</item>
+        <item name="colorVeryVeryDark">@color/very_very_dark_teal</item>
 
         <item name="backgroundLight">@color/light_teal</item>
         <item name="backgroundMediumLight">@color/medium_light_teal</item>
